@@ -6,7 +6,8 @@ build/
 *.d
 *.a
 *.out
-!lib/*.a
+!lib/windows/*.a
+!lib/linux/*.a
 
 # Editores / SO
 .vscode/

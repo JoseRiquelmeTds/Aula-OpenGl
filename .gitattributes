@@ -1,4 +1,5 @@
-# Tudo em LF: o build roda no WSL2 e Makefile/scripts com CRLF quebram no Linux
+# Tudo em LF, inclusive no Windows: o mesmo clone pode ser compilado no Linux/WSL,
+# onde Makefile/scripts com CRLF quebram (o mingw32-make e o g++ aceitam LF normalmente)
 * text=auto eol=lf
 
 *.a   binary
