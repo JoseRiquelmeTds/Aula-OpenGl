@@ -1,0 +1,16 @@
+# Saída do Makefile (objetos, lib do projeto e executável)
+build/
+
+# Artefatos soltos de compilação manual
+*.o
+*.d
+*.a
+*.out
+!lib/*.a
+
+# Editores / SO
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

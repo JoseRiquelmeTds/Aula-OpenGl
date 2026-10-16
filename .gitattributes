@@ -1,0 +1,6 @@
+# Tudo em LF: o build roda no WSL2 e Makefile/scripts com CRLF quebram no Linux
+* text=auto eol=lf
+
+*.a   binary
+*.png binary
+*.jpg binary
