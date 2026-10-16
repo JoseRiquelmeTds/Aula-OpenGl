@@ -3,14 +3,14 @@
 
 namespace renderer {
 
-// Estado inicial do OpenGL (cor de fundo etc.). Chamar depois de glutCreateWindow.
+// Estado inicial do OpenGL (cor de fundo etc.). Chamar depois de carregar o GLAD.
 void init();
 
-// Callback de glutDisplayFunc: desenha a cena.
-void display();
+// Desenha um quadro. Chamado uma vez por iteração do loop principal.
+void draw();
 
-// Callback de glutReshapeFunc: ajusta viewport e projeção ao tamanho da janela.
-void reshape(int width, int height);
+// Ajusta o viewport ao tamanho do framebuffer (em pixels, não em coordenadas de tela).
+void resize(int width, int height);
 
 }  // namespace renderer
 

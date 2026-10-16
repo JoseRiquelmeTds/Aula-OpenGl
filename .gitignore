@@ -1,17 +1,27 @@
-# Saída do Makefile (objetos, lib do projeto e executável)
+# Saída do CMake (build/<preset>/ com objetos, bibliotecas e executável)
 build/
+out/
+CMakeUserPresets.json
 
 # Artefatos soltos de compilação manual
 *.o
+*.obj
 *.d
 *.a
+*.lib
+*.exe
 *.out
-!lib/windows/*.a
-!lib/linux/*.a
+CMakeCache.txt
+CMakeFiles/
 
-# Editores / SO
+# Editores / IDEs
 .vscode/
 .idea/
+.vs/
+.cache/
 *.swp
+*.user
+
+# SO
 .DS_Store
 Thumbs.db

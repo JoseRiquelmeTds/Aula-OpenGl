@@ -1,20 +1,21 @@
 # Setup do ambiente: Windows, Linux ou WSL2
 
-O projeto compila com **g++ + `make`** em três ambientes, todos com o mesmo `Makefile`:
+O projeto compila com **CMake + g++** em três ambientes, todos com o mesmo `CMakeLists.txt` e os presets de `CMakePresets.json`:
 
-| Ambiente | Compilador | Comando do make | Janela |
+| Ambiente | Compilador | Preset | Janela |
 | --- | --- | --- | --- |
-| **Windows** (nativo) | MinGW-w64 do MSYS2 (UCRT64) | `mingw32-make` | Win32 |
-| **Linux** (Ubuntu/Debian) | g++ do sistema | `make` | X11 |
-| **WSL2** (Ubuntu) | g++ do sistema | `make` | WSLg |
+| **Windows** (nativo) | MinGW-w64 do MSYS2 (UCRT64) | `windows` | Win32 |
+| **Linux** (Ubuntu/Debian) | g++ do sistema | `linux` | X11 |
+| **WSL2** (Ubuntu) | g++ do sistema | `linux` | WSLg |
 
-O **freeglut já vem no repositório** (`lib/freeglut/`, código-fonte da versão 3.8.0). O `Makefile` compila ele na primeira vez
-como biblioteca estática (`build/<plataforma>/freeglut/libfreeglut.a`) e linka no executável. **Não instale freeglut no sistema**,
-nem baixe DLL/`.lib` de freeglut para Windows. Do sistema vêm só o OpenGL e a GLU (e o X11 no Linux).
+O projeto usa **OpenGL 3.3 core profile**. As bibliotecas **já vêm no repositório** em `lib/` (GLFW 3.5.1, GLAD, GLM 1.0.3 e
+stb_image, veja [lib/README.md](../lib/README.md)) e o CMake compila tudo junto com o projeto.
+**Não instale nenhuma delas no sistema**, nem baixe DLL/`.lib`. Do sistema vêm só o compilador, o CMake, o driver de vídeo
+e, no Linux, os headers do X11.
 
 > [!WARNING]
-> **Não use** Visual Studio/MSVC, Code::Blocks, CMake, vcpkg, freeglut pré-compilado, VcXsrv/Xming nem `export DISPLAY=<ip>:0`.
-> Esses caminhos aparecem em tutoriais antigos e não são o build deste repo. Se uma IA sugerir algum deles, ela está errada para este projeto.
+> **Não use** Visual Studio/MSVC, vcpkg, GLFW/GLEW/GLUT do sistema, VcXsrv/Xming nem `export DISPLAY=<ip>:0`.
+> Esses caminhos aparecem em tutoriais e não são o build deste repo. Se uma IA sugerir algum deles, ela está errada para este projeto.
 
 ---
 
@@ -38,11 +39,11 @@ nem baixe DLL/`.lib` de freeglut para Windows. Do sistema vêm só o OpenGL e a 
    winget install Git.Git MSYS2.MSYS2
    ```
 
-2. Abra o terminal **"MSYS2 UCRT64"** (menu Iniciar) e instale o compilador e o make:
+2. Abra o terminal **"MSYS2 UCRT64"** (menu Iniciar) e instale o compilador, o make e o CMake:
 
    ```bash
    pacman -Syu
-   pacman -S --needed mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-make
+   pacman -S --needed mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-make mingw-w64-ucrt-x86_64-cmake
    ```
 
    Se o `pacman -Syu` fechar o terminal, abra de novo e rode a segunda linha.
@@ -54,37 +55,37 @@ nem baixe DLL/`.lib` de freeglut para Windows. Do sistema vêm só o OpenGL e a 
 
    ```powershell
    g++ --version          # deve mostrar "Built by MSYS2 project"
-   mingw32-make --version
+   cmake --version        # 3.21 ou mais novo
    git clone https://github.com/JoseRiquelmeTds/Aula-OpenGl.git
    cd Aula-OpenGl
-   mingw32-make run
+   cmake --preset windows
+   cmake --build --preset windows --target run
    ```
 
-> No Windows o comando é **`mingw32-make`**, não `make`. Todos os exemplos com `make` deste repo valem trocando o nome.
-
-O `.exe` é linkado com `-static`: só depende de DLLs do próprio Windows, então abre com dois cliques e roda em outro PC sem MSYS2.
+O preset `windows` usa o gerador **"MinGW Makefiles"** e o `g++` do `Path`. O `.exe` é linkado com `-static`: só depende de DLLs
+do próprio Windows, então abre com dois cliques e roda em outro PC sem MSYS2.
 
 ## 2. Linux (Ubuntu/Debian)
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential libx11-dev libgl1-mesa-dev libglu1-mesa-dev mesa-utils
+sudo apt install -y build-essential cmake libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-utils
 git clone https://github.com/JoseRiquelmeTds/Aula-OpenGl.git
 cd Aula-OpenGl
-make run
+cmake --preset linux
+cmake --build --preset linux --target run
 ```
-
-Depois da primeira vez, `make deps` faz a mesma instalação do `apt`.
 
 | Pacote | Para quê |
 | --- | --- |
-| `build-essential` | `g++`, `gcc`, `make`, `ar` |
-| `libx11-dev` | X11 (`X11/Xlib.h`, `-lX11`), usado pelo freeglut para abrir a janela |
-| `libgl1-mesa-dev` | OpenGL (`GL/gl.h`, `-lGL`) |
-| `libglu1-mesa-dev` | GLU (`GL/glu.h`, `-lGLU`) |
-| `mesa-utils` | `glxinfo`, usado pelo `make doctor` para conferir o driver |
+| `build-essential` | `g++`, `gcc`, `make` |
+| `cmake` | o build (3.21 ou mais novo; o Ubuntu 22.04 já tem) |
+| `libx11-dev`, `libxrandr-dev`, `libxinerama-dev`, `libxcursor-dev`, `libxi-dev` | headers do X11 que o GLFW usa para abrir a janela e ler teclado/mouse |
+| `mesa-utils` | `glxinfo` (usado pelo `doctor.cmake`) e o driver OpenGL do Mesa |
 
-Outras distros: instale os equivalentes (Fedora: `gcc-c++ make libX11-devel mesa-libGL-devel mesa-libGLU-devel glx-utils`).
+Não precisa de `libgl1-mesa-dev` nem `libglu1-mesa-dev`: o GLAD carrega as funções do OpenGL direto do driver.
+
+Outras distros: instale os equivalentes (Fedora: `gcc-c++ make cmake libX11-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel glx-utils`).
 
 ## 3. WSL2
 
@@ -102,124 +103,151 @@ wsl -l -v                   # a coluna VERSION precisa ser 2
 Dicas:
 
 - Clone na **home do Linux** (`cd ~`). Em `/mnt/c/...` funciona, mas o build fica bem mais lento.
-- Pode usar **o mesmo clone** no Windows e no WSL: o build de cada plataforma vai para uma pasta própria (`build/windows/`, `build/linux/`).
+- Pode usar **o mesmo clone** no Windows e no WSL: cada preset compila numa pasta própria (`build/windows/`, `build/linux/`).
 - Para editar no VS Code do Windows, instale a extensão **WSL** (Microsoft) e rode `code .` dentro da pasta.
 
 ## 4. Verificar o ambiente
 
+Na raiz do repositório, em qualquer sistema:
+
 ```bash
-make doctor            # Windows: mingw32-make doctor
+cmake -P cmake/doctor.cmake
 ```
 
 Tudo precisa aparecer como `[ok]`. Exemplo no WSL:
 
 ```
 == Sistema
-  plataforma: linux (WSL)
-  shell: sh
+  plataforma: Linux (WSL)
   [ok] repo no filesystem do Linux
 == Ferramentas
+  [ok] cmake 3.28.3
   [ok] g++ 13.3.0 (x86_64-linux-gnu)
-  [ok] ar encontrado
-  make 4.3
-== freeglut
-  [ok] fontes em lib/freeglut
-  [ok] build/linux/freeglut/libfreeglut.a compilada
-== Headers do sistema
+  [ok] make encontrado
+== Bibliotecas em lib/
+  [ok] lib/glfw/src/init.c
+  [ok] lib/glad/src/gl.c
+  [ok] lib/glm/glm/glm.hpp
+  [ok] lib/stb/stb_image.h
+== Headers do X11 (usados pelo GLFW)
   [ok] X11/Xlib.h
-  [ok] GL/gl.h
-  [ok] GL/glu.h
-== Display
+  [ok] X11/extensions/Xrandr.h
+  [ok] X11/extensions/Xinerama.h
+  [ok] X11/Xcursor/Xcursor.h
+  [ok] X11/extensions/XInput2.h
+== Display e OpenGL
   [ok] DISPLAY=:0
-  [ok] OpenGL renderer string: D3D12 (NVIDIA GeForce ...)
+  OpenGL renderer string: D3D12 (NVIDIA GeForce ...)
+  [ok] OpenGL core 4.6 (o projeto precisa de 3.3)
+
+Tudo certo. ...
 ```
 
 No WSL, `D3D12 (...)` no renderer = usando a GPU. `llvmpipe` = renderização por software (funciona, mas veja a [seção 7](#7-problemas-comuns)).
-A linha `libfreeglut.a ainda não compilada` antes do primeiro `make` é normal.
+No Windows o script confere só as ferramentas e o `lib/`. O OpenGL é testado ao abrir a janela.
 
 ## 5. Compilar e rodar
 
+No Windows, troque `linux` por `windows`:
+
 ```bash
-make run               # Windows: mingw32-make run
+cmake --preset linux                          # configura (só na primeira vez)
+cmake --build --preset linux --target run     # compila e abre a janela
 ```
 
-Deve abrir uma janela **"Aula OpenGL"** com um triângulo colorido. `Esc` ou `q` fecha.
-A primeira compilação demora alguns segundos a mais porque compila o freeglut. As próximas reaproveitam a biblioteca.
+Deve abrir uma janela **"Aula OpenGL"** com fundo azul-escuro, e o terminal mostra a versão do OpenGL e a placa de vídeo usada.
+`Esc` ou `q` fecha. A primeira compilação demora mais porque compila o GLFW e o GLAD. As próximas reaproveitam.
 
 | Comando | O que faz |
 | --- | --- |
-| `make` | Compila em modo debug (`-g -O0`) |
-| `make run` | Compila e executa |
-| `make run MODE=release` | Compila otimizado (`-O2`) e executa |
-| `make clean` | Apaga `build/` (inclusive o freeglut compilado) |
-| `make doctor` | Diagnóstico do ambiente |
-| `make deps` | Instala as dependências (Linux/WSL) ou mostra como instalar (Windows) |
-| `make help` | Lista os alvos |
+| `cmake --preset linux` | Configura o build debug (`-g`) em `build/linux/` |
+| `cmake --build --preset linux` | Compila |
+| `cmake --build --preset linux --target run` | Compila e executa (a partir da raiz do repositório) |
+| `cmake --preset linux-release` | Configura o build otimizado (`-O2`) em `build/linux-release/` |
+| `cmake --build --preset linux-release --target run` | Compila otimizado e executa |
+| `cmake -P cmake/doctor.cmake` | Diagnóstico do ambiente |
+
+O executável fica em `build/<preset>/bin/aula-opengl` (`.exe` no Windows). O alvo `run` executa o programa **a partir da raiz
+do repositório**, então o código pode abrir arquivos com caminho relativo, como `shaders/basico.vert` ou `assets/textures/caixa.png`.
+Se rodar o executável de outro lugar (dois cliques, por exemplo), abra o terminal na raiz antes.
+
+Para começar do zero (depois de trocar de compilador, por exemplo), apague a pasta `build/` e configure de novo.
 
 ## 6. Estrutura do projeto
 
 ```
 Aula-OpenGl/
-├── Makefile              # build e execução (Windows, Linux e WSL)
+├── CMakeLists.txt        # build do projeto
+├── CMakePresets.json     # presets linux, linux-release, windows, windows-release
 ├── include/              # headers (.hpp): só declarações
 │   └── renderer.hpp
 ├── src/                  # implementações (.cpp)
-│   ├── main.cpp          # ponto de entrada (glutInit, callbacks, main loop)
+│   ├── main.cpp          # ponto de entrada (janela GLFW, GLAD, loop principal)
 │   └── renderer.cpp
-├── lib/                  # bibliotecas de TERCEIROS
-│   ├── freeglut/         # código-fonte do freeglut 3.8.0 (compilado pelo Makefile)
-│   ├── windows/          # (opcional) .a pré-compilados para MinGW-w64
-│   └── linux/            # (opcional) .a pré-compilados para Linux x86-64
+├── shaders/              # shaders GLSL (#version 330 core)
+├── assets/
+│   └── textures/         # imagens de textura (PNG/JPG, lidas com stb_image)
+├── lib/                  # bibliotecas de TERCEIROS, embutidas (veja lib/README.md)
+│   ├── CMakeLists.txt    # alvos glfw, glad, glm e stb_image
+│   ├── glfw/             # GLFW 3.5.1
+│   ├── glad/             # loader do OpenGL 3.3 core (gerado)
+│   ├── glm/              # GLM 1.0.3 (só headers)
+│   └── stb/              # stb_image
+├── cmake/
+│   └── doctor.cmake      # diagnóstico do ambiente
 ├── docs/
 │   └── SETUP.md          # este arquivo
-└── build/                # gerado pelo make, ignorado pelo git
-    └── windows/ | linux/
-        ├── freeglut/     # libfreeglut.a (compilada uma vez por plataforma)
-        └── debug/ | release/
-            ├── obj/      # .o e .d (dependências de header)
-            ├── lib/      # libaula-opengl.a: todo src/ exceto main.cpp
-            └── bin/      # aula-opengl(.exe)
+└── build/                # gerado pelo CMake, ignorado pelo git
+    └── <preset>/
+        ├── lib/          # libglfw3.a, libglad.a, libstb_image.a, libaula-opengl.a
+        └── bin/          # aula-opengl(.exe)
 ```
 
 Como o build funciona:
 
-1. Os `.c` do freeglut (os comuns + `mswin/` no Windows ou `x11/` no Linux) viram `build/<plataforma>/freeglut/libfreeglut.a`.
-   A configuração de cada plataforma fica em `lib/freeglut/config/<plataforma>/config.h`.
-2. Cada `src/**/*.cpp` vira um `.o` em `build/<plataforma>/<modo>/obj/`, compilado com `-Iinclude -Ilib/freeglut/include`.
-3. Todos os `.o` do projeto, **exceto o `main.o`**, são empacotados em `libaula-opengl.a`.
-4. O executável é linkado como `main.o + libaula-opengl.a + lib/<plataforma>/*.a + libfreeglut.a` + bibliotecas do sistema:
-   - Windows: `-lglu32 -lopengl32 -lgdi32 -lwinmm` (e `-static`)
-   - Linux/WSL: `-lGLU -lGL -lX11 -lm`
+1. `lib/CMakeLists.txt` compila o GLFW, o GLAD e o stb_image como bibliotecas estáticas. O GLM é só header.
+2. Todo `src/**/*.cpp`, **exceto o `main.cpp`**, vira a biblioteca `libaula-opengl.a`, compilada com `-Wall -Wextra -Wpedantic`
+   e com acesso a `include/` e aos headers de todas as bibliotecas de `lib/`.
+3. O executável é `main.cpp` + `libaula-opengl.a` + as bibliotecas de `lib/`. No Windows ele é linkado com `-static`.
 
 **Para adicionar um módulo** (ex.: `camera`): crie `include/camera.hpp` e `src/camera.cpp`, depois `#include "camera.hpp"` onde precisar.
-**Não precisa editar o Makefile.** Ele encontra os `.cpp` sozinho, inclusive em subpastas (`src/shapes/cubo.cpp` → `include/shapes/cubo.hpp`).
+**Não precisa editar o `CMakeLists.txt`.** Ele encontra os `.cpp` sozinho, inclusive em subpastas
+(`src/shapes/cubo.cpp` → `include/shapes/cubo.hpp`). Se o arquivo novo não entrar no build, rode `cmake --preset ...` de novo.
 
-Nos `.cpp`, continue usando `#include <GL/glut.h>` (ou `<GL/freeglut.h>`). O `-Ilib/freeglut/include` faz esse include pegar o freeglut do repo.
+Nos `.cpp`, inclua `<glad/gl.h>` antes de qualquer outro header de OpenGL. Use só OpenGL **3.3 core**: nada de `glBegin`/`glEnd`,
+`glMatrixMode` ou `gluPerspective`. As matrizes vêm do GLM e o desenho é feito com VAO/VBO e shaders.
 
 ## 7. Problemas comuns
 
 <details>
-<summary>Windows: <code>mingw32-make</code> ou <code>g++</code> não é reconhecido como comando</summary>
+<summary>Windows: <code>cmake</code>, <code>g++</code> ou <code>mingw32-make</code> não é reconhecido como comando</summary>
 
-O `C:\msys64\ucrt64\bin` não está no `Path`, ou o terminal foi aberto antes de você mudar o `Path`. Refaça o passo 3 da [seção 1](#1-windows-mingw-w64-via-msys2) e abra um terminal novo.
-Se instalou o pacote `make` do MSYS2 em vez do `mingw-w64-ucrt-x86_64-make`, o comando `make` só existe dentro do terminal MSYS2.
+O `C:\msys64\ucrt64\bin` não está no `Path`, ou o terminal foi aberto antes de você mudar o `Path`. Refaça os passos 2 e 3 da
+[seção 1](#1-windows-mingw-w64-via-msys2) e abra um terminal novo.
 </details>
 
 <details>
-<summary>Windows: <code>undefined reference to `__imp_glut...`</code> ou erros de link com <code>glut</code></summary>
+<summary>Windows: <code>MSVC não é suportado</code> ou o CMake escolheu o Visual Studio</summary>
 
-Tem outro freeglut (DLL/`.lib` baixado de tutorial) sendo usado no lugar do do repo. Não passe `-lfreeglut`/`-lglut`, não copie `freeglut.dll`
-para o projeto e compile só pelo `mingw32-make`. Rode `mingw32-make clean` e compile de novo.
+O CMake foi chamado sem o preset (ou pelo Visual Studio). Apague `build/` e rode `cmake --preset windows` no terminal.
+Se o erro disser que o `g++` "is not a full path and was not found in the PATH", o `C:\msys64\ucrt64\bin` não está no `Path`.
 </details>
 
 <details>
-<summary>Linux/WSL: <code>fatal error: X11/Xlib.h</code>, <code>GL/gl.h</code> ou <code>GL/glu.h: No such file or directory</code></summary>
+<summary>Linux/WSL: <code>RandR headers not found</code>, <code>Xinerama headers not found</code> ou parecido</summary>
 
-Faltam as dependências do sistema. Rode `make deps` ou o `apt install` da [seção 2](#2-linux-ubuntudebian).
+Faltam os headers do X11. Rode o `apt install` da [seção 2](#2-linux-ubuntudebian), apague `build/` e configure de novo.
 </details>
 
 <details>
-<summary>WSL: <code>freeglut (...): failed to open display ''</code> ou a janela não aparece</summary>
+<summary><code>No such preset</code> ou <code>CMakePresets.json</code> com versão não suportada</summary>
+
+O CMake é mais antigo que o 3.21. No Windows, atualize com `pacman -Syu` no terminal MSYS2. No Ubuntu 20.04 ou mais antigo,
+instale um CMake novo pelo `pip install cmake` ou pelo <https://apt.kitware.com>.
+</details>
+
+<details>
+<summary>WSL: <code>GLFW (65550): X11: Failed to open display</code>, <code>The DISPLAY environment variable is missing</code> ou a janela não aparece</summary>
 
 O WSLg não está ativo. No PowerShell:
 
@@ -233,19 +261,26 @@ Se você colocou `export DISPLAY=...` no `~/.bashrc` por causa de um tutorial an
 </details>
 
 <details>
-<summary><code>Makefile:…: *** missing separator</code> ou <code>$'\r': command not found</code></summary>
+<summary><code>GLFW (65543): ... requested version 3.3 ...</code> ou <code>GLAD: não foi possível carregar o OpenGL 3.3</code></summary>
+
+O driver de vídeo não oferece OpenGL 3.3 core. Atualize o driver da placa de vídeo **no Windows** (também vale para o WSL;
+não instale driver dentro do Ubuntu). No Linux, rode `cmake -P cmake/doctor.cmake` e confira a linha `OpenGL core`.
+</details>
+
+<details>
+<summary><code>$'\r': command not found</code> ou erros estranhos de sintaxe depois de editar no Windows</summary>
 
 Os arquivos estão com quebra de linha do Windows (CRLF). O `.gitattributes` do repo força LF em todo clone, então isso só acontece
 se algum editor salvou o arquivo com CRLF. No VS Code, clique em `CRLF` na barra inferior, troque para `LF` e salve.
 </details>
 
 <details>
-<summary>WSL: janela preta, lenta, ou <code>make doctor</code> mostra <code>llvmpipe</code></summary>
+<summary>WSL: janela preta, lenta, ou o <code>doctor.cmake</code> mostra <code>llvmpipe</code></summary>
 
 O OpenGL está rodando na CPU. Atualize o driver de vídeo **no Windows** (não instale driver dentro do Ubuntu) e rode `wsl --shutdown`.
 Se a GPU der problema, force software para testar:
 
 ```bash
-LIBGL_ALWAYS_SOFTWARE=1 make run
+LIBGL_ALWAYS_SOFTWARE=1 ./build/linux/bin/aula-opengl
 ```
 </details>
