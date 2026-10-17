@@ -1,0 +1,11 @@
+# Tudo em LF, inclusive no Windows: o mesmo clone pode ser compilado no Linux/WSL,
+# onde scripts com CRLF quebram (o CMake, o mingw32-make e o g++ aceitam LF normalmente)
+* text=auto eol=lf
+
+*.a    binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.bmp  binary
+*.tga  binary
+*.hdr  binary
