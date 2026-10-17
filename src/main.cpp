@@ -74,6 +74,7 @@ int main() {
         glfwPollEvents();
     }
 
+    renderer::shutdown();
     glfwDestroyWindow(window);
     glfwTerminate();
     return EXIT_SUCCESS;
