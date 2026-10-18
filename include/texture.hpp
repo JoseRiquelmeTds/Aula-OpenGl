@@ -10,8 +10,11 @@
 // =============================================================================
 //
 //  O construtor lê o arquivo, cria a textura OpenGL, gera os mipmaps e configura wrap e
-//  filtro. Se o arquivo não abrir, o erro vai para o console e a textura fica inválida:
-//  isValid() retorna false e bind() não faz nada.
+//  filtro. Se a leitura ou criação na GPU falhar, o erro vai para o console e a textura
+//  fica inválida: id e dimensões zerados, isValid() == false e bind() não faz nada.
+//  Construção, bind e destruição exigem contexto OpenGL ativo e GLAD carregado.
+//  O construtor consulta glGetError(): erros preexistentes são registrados separadamente
+//  e consumidos para isolar o diagnóstico. A API OpenGL não permite restaurar esses flags.
 //
 //  Wrap (o que acontece com UV fora de 0..1):
 //   - Repeat (padrão): a textura se repete. É o que faz o tiling das primitivas funcionar
@@ -50,12 +53,15 @@ public:
 
     // Liga a textura numa unidade (0, 1, 2...). O sampler2D do shader recebe o NÚMERO da
     // unidade via setInt, não o id da textura.
+    // Unidades fora do limite do contexto são ignoradas sem alterar estado OpenGL,
+    // com um aviso no máximo por instância.
     void bind(int unit = 0) const;
 
 private:
     GLuint id_ = 0;
     int width_ = 0;
     int height_ = 0;
+    mutable bool warnedInvalidUnit_ = false;
 };
 
 #endif  // AULA_OPENGL_TEXTURE_HPP
