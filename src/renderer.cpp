@@ -10,13 +10,15 @@
 #include "primitives.hpp"
 #include "scene_node.hpp"
 #include "shader.hpp"
+#include "texture.hpp"
 
 namespace renderer {
 
 namespace {
 
-// Modo do fragment shader básico: 0 = cor sólida, 1 = normal como cor, 2 = UV como cor.
-constexpr int kDebugMode = 1;
+// Modo do fragment shader básico: 0 = cor sólida, 1 = normal como cor, 2 = UV como cor,
+// 3 = textura.
+constexpr int kDebugMode = 3;
 
 std::unique_ptr<Shader> basicShader;
 float aspectRatio = 1.0f;
@@ -32,6 +34,11 @@ std::unique_ptr<Mesh> baseMesh;
 std::unique_ptr<Mesh> rodMesh;
 std::unique_ptr<Mesh> armMesh;
 std::unique_ptr<SceneNode> scene;
+
+// Textura de teste: o vermelho cresce com u (para a direita) e o verde com v (para cima),
+// as mesmas cores do kDebugMode = 2. Se aparecer verde embaixo, a imagem está de cabeça
+// para baixo. Por enquanto vale para a cena toda; textura por objeto vem com os materiais.
+std::unique_ptr<Texture> testTexture;
 
 void createExampleScene() {
     // Piso de 4 x 4 m com a textura repetindo a cada 1 m (com kDebugMode = 2, a UV vai de 0 a 4).
@@ -64,9 +71,12 @@ void createExampleScene() {
     // O braço tem o pivô na base e centrado em x; deslocado 0,25 m para começar no pivô
     // em vez de atravessá-lo, e 0,02 m para baixo para o eixo do braço passar pelo pivô.
     joint.addChild(armMesh.get(), glm::translate(glm::mat4(1.0f), glm::vec3(0.25f, -0.02f, 0.0f)));
+
+    testTexture = std::make_unique<Texture>("assets/textures/uv_teste.png");
 }
 
 void destroyExampleScene() {
+    testTexture.reset();
     // As peças primeiro: elas apontam para os meshes.
     scene.reset();
     armMesh.reset();
@@ -102,6 +112,10 @@ void draw() {
     basicShader->setMat4("uProjection", projection);
     basicShader->setInt("uDebugMode", kDebugMode);
     basicShader->setVec3("uColor", glm::vec3(0.8f, 0.5f, 0.2f));
+
+    // Liga a textura na unidade 0 e diz ao sampler2D para ler dessa unidade.
+    testTexture->bind(0);
+    basicShader->setInt("uTexture", 0);
 
     // Cada peça define o próprio uModel antes de desenhar.
     scene->draw(*basicShader);
