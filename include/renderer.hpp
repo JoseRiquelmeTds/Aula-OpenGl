@@ -12,6 +12,9 @@ void draw();
 // Ajusta o viewport ao tamanho do framebuffer (em pixels, não em coordenadas de tela).
 void resize(int width, int height);
 
+// Libera shaders e buffers. Chamar antes de destruir a janela, enquanto o contexto existe.
+void shutdown();
+
 }  // namespace renderer
 
 #endif  // AULA_OPENGL_RENDERER_HPP
