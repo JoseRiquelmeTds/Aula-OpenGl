@@ -1,5 +1,5 @@
-#ifndef AULA_OPENGL_TEXTURE_HPP
-#define AULA_OPENGL_TEXTURE_HPP
+#ifndef AULA_OPENGL_GFX_TEXTURE_HPP
+#define AULA_OPENGL_GFX_TEXTURE_HPP
 
 #include <glad/gl.h>
 
@@ -64,4 +64,4 @@ private:
     mutable bool warnedInvalidUnit_ = false;
 };
 
-#endif  // AULA_OPENGL_TEXTURE_HPP
+#endif  // AULA_OPENGL_GFX_TEXTURE_HPP

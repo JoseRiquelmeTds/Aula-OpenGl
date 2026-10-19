@@ -1,4 +1,4 @@
-#include "renderer.hpp"
+#include "gfx/renderer.hpp"
 
 #include <glad/gl.h>
 #include <glm/glm.hpp>
@@ -6,12 +6,12 @@
 
 #include <memory>
 
-#include "camera.hpp"
-#include "mesh.hpp"
-#include "primitives.hpp"
-#include "scene_node.hpp"
-#include "shader.hpp"
-#include "texture.hpp"
+#include "core/camera.hpp"
+#include "gfx/mesh.hpp"
+#include "gfx/primitives.hpp"
+#include "gfx/scene_node.hpp"
+#include "gfx/shader.hpp"
+#include "gfx/texture.hpp"
 
 namespace renderer {
 

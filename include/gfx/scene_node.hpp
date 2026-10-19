@@ -1,13 +1,13 @@
-#ifndef AULA_OPENGL_SCENE_NODE_HPP
-#define AULA_OPENGL_SCENE_NODE_HPP
+#ifndef AULA_OPENGL_GFX_SCENE_NODE_HPP
+#define AULA_OPENGL_GFX_SCENE_NODE_HPP
 
 #include <glm/glm.hpp>
 
 #include <memory>
 #include <vector>
 
-#include "mesh.hpp"
-#include "shader.hpp"
+#include "gfx/mesh.hpp"
+#include "gfx/shader.hpp"
 
 // =============================================================================
 //  SceneNode: uma peça de um objeto composto, com transformação própria e filhos.
@@ -62,4 +62,4 @@ private:
     std::vector<std::unique_ptr<SceneNode>> children_;
 };
 
-#endif  // AULA_OPENGL_SCENE_NODE_HPP
+#endif  // AULA_OPENGL_GFX_SCENE_NODE_HPP

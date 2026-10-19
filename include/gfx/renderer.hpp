@@ -1,5 +1,5 @@
-#ifndef AULA_OPENGL_RENDERER_HPP
-#define AULA_OPENGL_RENDERER_HPP
+#ifndef AULA_OPENGL_GFX_RENDERER_HPP
+#define AULA_OPENGL_GFX_RENDERER_HPP
 
 class Camera;
 
@@ -25,4 +25,4 @@ void shutdown();
 
 }  // namespace renderer
 
-#endif  // AULA_OPENGL_RENDERER_HPP
+#endif  // AULA_OPENGL_GFX_RENDERER_HPP

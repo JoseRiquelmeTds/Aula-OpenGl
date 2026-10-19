@@ -5,9 +5,9 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "camera.hpp"
-#include "input.hpp"
-#include "renderer.hpp"
+#include "core/camera.hpp"
+#include "core/input.hpp"
+#include "gfx/renderer.hpp"
 
 namespace {
 
