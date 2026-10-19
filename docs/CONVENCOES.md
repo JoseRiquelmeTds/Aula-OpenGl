@@ -37,13 +37,13 @@ Cada objeto é modelado no **próprio espaço**, com o pivô na origem:
   fixação** (centro da face encostada na parede, ou topo encostado no teto).
 - **Peças animadas: pivô no ponto da transformação.** Centro das hélices do ventilador (rotação), **topo** da tela
   retrátil (escala em Y que recolhe para cima). Use um `SceneNode` sem mesh como articulação (exemplos em
-  `include/scene_node.hpp`).
+  `include/gfx/scene_node.hpp`).
 - **Frente do objeto para +Z** no espaço local (o lado que o usuário vê: assento da cadeira, face do quadro, lente do
   projetor). Assim, posicionar na sala é só translação + rotação em Y.
 
 ## 3. Vértices, normais e UV
 
-O formato é único e está em `include/vertex.hpp`: **todo vértice tem posição, normal e UV**, nessa ordem
+O formato é único e está em `include/gfx/vertex.hpp`: **todo vértice tem posição, normal e UV**, nessa ordem
 (locations 0, 1 e 2 no shader).
 
 - **Normal com comprimento 1, apontando para fora.** Em faces planas, cada canto tem o próprio vértice com a normal da
@@ -57,7 +57,7 @@ O formato é único e está em `include/vertex.hpp`: **todo vértice tem posiç�
 
 ## 4. Modelagem no código
 
-- Os 9 objetos são **modelados no código**, com as primitivas de `include/primitives.hpp` (`box`, `cylinder`, `plane`)
+- Os 9 objetos são **modelados no código**, com as primitivas de `include/gfx/primitives.hpp` (`box`, `cylinder`, `plane`)
   ou com um `MeshData` montado à mão no `.cpp` do objeto.
 - **Modelo feito no Blender (ou baixado, OBJ/FBX) conta como importado**, mesmo que a equipe tenha modelado. O relatório
   lista os importados e eles têm limite de **30%** (CG-80). Hoje o projeto não tem carregador de modelo; incluir um
@@ -131,8 +131,7 @@ no mesmo PR.** "Reservada" é a sugestão para a task; o responsável pode troca
 | `Q` | Fecha | `main.cpp` | CG-54 | em uso |
 | `W` `A` `S` `D` + mouse | Anda e olha | `main.cpp` | CG-55, CG-68 | em uso |
 | `Espaço` / `Ctrl` esquerdo | Sobe / desce | `main.cpp` | CG-55 | em uso |
-| `1` `2` `3` | Inspeção: cena / cubo / objeto articulado (cena de exemplo) | `main.cpp` | CG-55 | em uso, muda no refactor R3 |
-| `0`, `1`–`9` | Inspeção: sala inteira / cada objeto, na ordem da [tabela de objetos](ARQUITETURA.md#objetos-da-sala) | `scene/classroom` | refactor R3 | reservada |
+| `0`, `1`–`9` | Inspeção: sala inteira / cada alvo, na ordem de registro em `Classroom`. Hoje `1` = cubo e `2` = objeto articulado (cena de exemplo); com os objetos reais, a ordem da [tabela de objetos](ARQUITETURA.md#objetos-da-sala) | `scene/classroom` | CG-55, CG-87 | em uso |
 | `T` | Tela retrátil: abre / recolhe | `scene/classroom` | CG-75 | reservada |
 | `V` | Ventilador: liga / desliga | `scene/classroom` | CG-76 | reservada |
 | `P` | Projetor: liga / desliga | `scene/classroom` | CG-77 | reservada |

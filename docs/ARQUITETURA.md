@@ -5,10 +5,8 @@ Como o código está organizado, quem depende de quem e **onde colocar cada cois
 vértice) em [CONVENCOES.md](CONVENCOES.md).
 
 > [!NOTE]
-> **Estado (CG-53):** esta página descreve a arquitetura **alvo**. As pastas `core/`, `gfx/` e `scene/` entram com o
-> [refactor pendente](#5-refactor-pendente). Até ele ser mergeado, os módulos de `core/` e `gfx/` continuam na raiz de
-> `include/` e `src/` (`#include "mesh.hpp"`) e a cena de exemplo continua em `src/renderer.cpp`.
-> Os objetos novos (Sprint 1) já devem nascer em `objects/`.
+> A pasta `objects/` e o `gfx/material` ainda não existem: nascem com o primeiro objeto da Sprint 1 e com a CG-72.
+> Por enquanto `scene/classroom` monta a cena de exemplo da estrutura de mesh (piso, cubo e objeto articulado).
 
 ## Sumário
 
@@ -16,7 +14,7 @@ vértice) em [CONVENCOES.md](CONVENCOES.md).
 2. [Camadas e regras de dependência](#2-camadas-e-regras-de-dependência)
 3. [Pastas e módulos](#3-pastas-e-módulos)
 4. [Onde adicionar uma feature](#4-onde-adicionar-uma-feature)
-5. [Refactor pendente](#5-refactor-pendente)
+5. [Revisão e refactor](#5-revisão-e-refactor)
 6. [Detalhes dos módulos](#6-detalhes-dos-módulos)
 
 ---
@@ -31,10 +29,12 @@ Um frame do loop principal (`src/main.cpp`):
 ```
 input.beginFrame(); glfwPollEvents();        core/input     eventos do frame
 deltaTime = ...                              main.cpp       segundos, limitado a [0, 0.1]
-update(...)                                  main.cpp       atalhos globais (Q, Esc, captura do cursor) + câmera
-  └─ classroom.update(input, deltaTime)      scene/         teclas das interações e da inspeção -> métodos dos objetos
-       └─ fan.update(deltaTime) ...          objects/       animação de cada objeto
-renderer::draw(camera, classroom.root())     gfx/renderer   shader, matrizes view/projeção, desenha a árvore
+update(...)                                  main.cpp       atalhos globais (Q, Esc, captura do cursor)
+  ├─ classroom.update(input, deltaTime)      scene/         teclas das interações -> métodos dos objetos
+  │    └─ fan.update(deltaTime) ...          objects/       animação de cada objeto
+  ├─ classroom.handleInspection(input, cam)  scene/         teclas 0-9: isola um alvo e reenquadra a câmera
+  └─ camera.rotate(...) / camera.move(...)   core/camera    navegação, só com o cursor capturado
+renderer::draw(camera, root, texture)        gfx/renderer   shader, matrizes view/projeção, desenha a árvore
 glfwSwapBuffers(window);
 ```
 
@@ -80,9 +80,9 @@ include/                         src/
 │   ├── scene_node.hpp           │   ├── scene_node.cpp     hierarquia de peças (model = pai · transform)
 │   ├── shader.hpp               │   ├── shader.cpp         programa GLSL, set* de uniforms
 │   ├── texture.hpp              │   ├── texture.cpp        PNG/JPG -> textura com mipmaps
-│   ├── material.hpp             │   ├── material.cpp       (CG-72) cor, textura, brilho por peça
+│   ├── material.hpp             │   ├── material.cpp       (a criar, CG-72) cor, textura, brilho por peça
 │   └── renderer.hpp             │   └── renderer.cpp       estado do GL e desenho do frame
-├── objects/                     ├── objects/
+├── objects/                     ├── objects/               (a criar na Sprint 1)
 │   ├── furniture_style.hpp      │   │                      medidas e materiais comuns de carteira e cadeira
 │   ├── fan.hpp ...              │   ├── fan.cpp ...        um módulo por objeto (tabela abaixo)
 │   └── room.hpp                 │   └── room.cpp           paredes, piso e teto
@@ -217,23 +217,35 @@ void Fan::update(float deltaTime) {
 }
 ```
 
-E em `scene/classroom.cpp` só entram a posição e a tecla:
+E em `scene/classroom` só entram o membro, a posição, o alvo de inspeção e a tecla:
 
 ```cpp
+// include/scene/classroom.hpp, na seção private (objetos antes de root_: a árvore aponta para os meshes deles)
+objects::Fan fan_;
+```
+
+```cpp
+// src/scene/classroom.cpp, no construtor
 // Na parede x = +4 m, a 2,4 m do chão, com a frente (+Z do objeto) girada para -X (para dentro da sala).
 glm::mat4 fanPlacement = glm::translate(glm::mat4(1.0f), {3.9f, 2.4f, -1.0f});
 fanPlacement = glm::rotate(fanPlacement, glm::radians(-90.0f), {0.0f, 1.0f, 0.0f});
-fan_.addTo(root_, fanPlacement);
-// ...
+const SceneNode& fan = fan_.addTo(root_, fanPlacement);
+targets_.push_back({"ventilador", &fan, {2.5f, 2.0f, 0.0f}, {3.9f, 2.4f, -1.0f}});  // tecla = posição na lista
+
+// src/scene/classroom.cpp, em Classroom::update
 if (input.keyPressed(GLFW_KEY_V)) {
     fan_.toggle();
 }
 fan_.update(deltaTime);
 ```
 
-## 5. Refactor pendente
+O alvo de inspeção precisa ser um **filho direto de `root_`** (é o que `addTo(root_, ...)` devolve): ao isolar um alvo, a
+inspeção esconde os outros filhos da raiz.
 
-Revisão feita na CG-53, sobre o `dev` depois do merge da CG-55 (PR #6).
+## 5. Revisão e refactor
+
+Revisão feita na CG-53, sobre o `dev` depois do merge da CG-55 (PR #6). R1 a R3 foram feitos na **CG-87**; o R4 fica
+para a CG-72.
 
 ### O que está bom e fica
 
@@ -256,24 +268,18 @@ Revisão feita na CG-53, sobre o `dev` depois do merge da CG-55 (PR #6).
 
 ### Plano
 
-**R1 a R3 cabem num PR só, sem mudar o comportamento visível.** Precisam ser feitos **antes do primeiro objeto da Sprint 1
-ser mergeado**: hoje não há branch aberta mexendo nesses arquivos, então mover agora não gera conflito. Sugestão: abrir uma
-task própria na Sprint 0 (o refactor não faz parte do escopo da CG-53).
-
-| Passo | O que muda | Resolve |
-| --- | --- | --- |
-| R1 | `git mv` dos módulos para `core/` (input, camera) e `gfx/` (vertex, mesh, primitives, scene_node, shader, texture, renderer); includes viram `"gfx/mesh.hpp"` e os guards ganham a pasta (`AULA_OPENGL_GFX_MESH_HPP`). | P5 |
-| R2 | Cria `scene/classroom` com a cena de exemplo atual (dona dos meshes e da árvore). O renderer passa a só desenhar: `renderer::draw(const Camera&, const SceneNode& root)`, sem globais de conteúdo. | P1 |
-| R3 | Inspeção vira uma lista de alvos `{nome, nó, enquadramento}` em `Classroom`; teclas `0` (sala inteira) e `1`–`9` (cada objeto). `update` do `main.cpp` chama `classroom.update(input, deltaTime)` para teclas de interação e animação. | P2, P3 |
-| R4 | Junto com a CG-72: `Material` (cor, textura, brilho) em `gfx/`, ponteiro `const Material* material` no `SceneNode`, aplicado no `SceneNode::draw`. Remove a textura global. | P4 |
-
-Depois do R1 a R3, apagar a nota de estado no topo desta página.
+| Passo | O que muda | Resolve | Estado |
+| --- | --- | --- | --- |
+| R1 | `git mv` dos módulos para `core/` (input, camera) e `gfx/` (vertex, mesh, primitives, scene_node, shader, texture, renderer); includes viram `"gfx/mesh.hpp"` e os guards ganham a pasta (`AULA_OPENGL_GFX_MESH_HPP`). | P5 | feito (CG-87) |
+| R2 | Cria `scene/classroom` com a cena de exemplo atual (dona dos meshes, da textura e da árvore). O renderer passa a só desenhar: `renderer::draw(const Camera&, const SceneNode& root, const Texture* texture)`, sem globais de conteúdo. A textura única é provisória até o R4. | P1 | feito (CG-87) |
+| R3 | Inspeção vira uma lista de alvos `{nome, nó, enquadramento}` em `Classroom`; teclas `0` (sala inteira) e `1`–`9` (cada alvo). `update` do `main.cpp` chama `classroom.update(input, deltaTime)` (interações e animação) e `classroom.handleInspection(input, camera)`. | P2, P3 | feito (CG-87) |
+| R4 | Junto com a CG-72: `Material` (cor, textura, brilho) em `gfx/`, ponteiro `const Material* material` no `SceneNode`, aplicado no `SceneNode::draw`. Remove o parâmetro `texture` do `renderer::draw` e a textura de `Classroom`. | P4 | pendente |
 
 ## 6. Detalhes dos módulos
 
 ### Input e atualização por frame (CG-54)
 
-`Input` (`include/input.hpp`, `src/input.cpp`) acompanha uma janela GLFW. O loop chama
+`Input` (`include/core/input.hpp`, `src/core/input.cpp`) acompanha uma janela GLFW. O loop chama
 `input.beginFrame()` antes de `glfwPollEvents()` e depois entrega o estado a `update` em `src/main.cpp`.
 Todos os módulos podem consultar o mesmo frame, sem consumir os eventos:
 
@@ -303,19 +309,20 @@ recuperação nos próximos frames. Não há passo fixo nem cálculo baseado em 
 
 ### Câmera livre e inspeção (CG-55)
 
-`Camera` (`include/camera.hpp`, `src/camera.cpp`) guarda posição e orientação e calcula view/projeção
-sem depender do GLFW. `update` conecta o `Input` à câmera; `renderer::draw(camera)` usa suas matrizes
+`Camera` (`include/core/camera.hpp`, `src/core/camera.cpp`) guarda posição e orientação e calcula view/projeção
+sem depender do GLFW. `update` conecta o `Input` à câmera; `renderer::draw` usa suas matrizes
 com a proporção atual do framebuffer e suspende o desenho quando a largura ou altura é zero.
 `movementSpeed` (padrão **2 unidades/s**) e `mouseSensitivity` (**0,1 grau/pixel**) são configuráveis
 na câmera. O movimento combinado é normalizado e usa `deltaTime`; o delta do mouse **não** usa
 `deltaTime`. Não há colisões, gravidade ou limite de deslocamento.
 
-A seleção de inspeção (`1`/`2`/`3`, veja o README) funciona com a janela em foco, mesmo com o cursor livre, e restaura
-um enquadramento inicial para cada modo. Depois a câmera continua livre. A perda de foco libera o cursor e exige
+A inspeção fica em `scene::Classroom` (CG-87): `0` mostra a sala inteira e `1` a `9` isolam cada alvo registrado, na
+ordem da lista (hoje `1` = cubo e `2` = objeto articulado). Funciona com a janela em foco, mesmo com o cursor livre, e
+restaura um enquadramento para cada alvo; tecla sem alvo é ignorada. Depois a câmera continua livre. A perda de foco libera o cursor e exige
 novo clique para retomar a navegação; com o cursor livre não há movimento nem rotação pelo mouse.
 
 ### Mesh, primitivas, SceneNode, Shader e Texture (CG-56 a CG-58)
 
-Documentados nos próprios headers, com exemplos de uso: `vertex.hpp` (formato de vértice), `mesh.hpp` (VAO/VBO/EBO),
+Documentados nos próprios headers em `include/gfx/`, com exemplos de uso: `vertex.hpp` (formato de vértice), `mesh.hpp` (VAO/VBO/EBO),
 `primitives.hpp` (pivô e UV de cada primitiva), `scene_node.hpp` (hierarquia, pivô, ventilador e tela retrátil),
 `shader.hpp` e `texture.hpp` (wrap, filtro e unidades).
