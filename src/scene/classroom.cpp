@@ -13,7 +13,7 @@ namespace scene {
 
 namespace {
 
-// Enquadramento da sala inteira (tecla 0); é também o inicial da Camera.
+// Enquadramento da sala inteira (tecla 1); é também o inicial da Camera.
 constexpr glm::vec3 kSceneEye(2.0f, 2.0f, 3.0f);
 constexpr glm::vec3 kSceneCenter(0.0f, 0.4f, 0.0f);
 
@@ -57,10 +57,10 @@ void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {
 }
 
 bool Classroom::handleInspection(const Input& input, Camera& camera) {
-    // GLFW_KEY_0 a GLFW_KEY_9 são consecutivos.
-    for (int digit = 0; digit <= 9; ++digit) {
+    // GLFW_KEY_1 a GLFW_KEY_9 são consecutivos. 1 = sala inteira, 2 = primeiro alvo, ...
+    for (int digit = 1; digit <= 9; ++digit) {
         if (input.keyPressed(GLFW_KEY_0 + digit)) {
-            return selectInspection(digit == 0 ? kWholeScene : digit - 1, camera);
+            return selectInspection(digit == 1 ? kWholeScene : digit - 2, camera);
         }
     }
     return false;

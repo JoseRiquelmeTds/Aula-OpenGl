@@ -32,7 +32,7 @@ deltaTime = ...                              main.cpp       segundos, limitado a
 update(...)                                  main.cpp       atalhos globais (Q, Esc, captura do cursor)
   ├─ classroom.update(input, deltaTime)      scene/         teclas das interações -> métodos dos objetos
   │    └─ fan.update(deltaTime) ...          objects/       animação de cada objeto
-  ├─ classroom.handleInspection(input, cam)  scene/         teclas 0-9: isola um alvo e reenquadra a câmera
+  ├─ classroom.handleInspection(input, cam)  scene/         teclas 1-9: isola um alvo e reenquadra a câmera
   └─ camera.rotate(...) / camera.move(...)   core/camera    navegação, só com o cursor capturado
 renderer::draw(camera, root, texture)        gfx/renderer   shader, matrizes view/projeção, desenha a árvore
 glfwSwapBuffers(window);
@@ -230,7 +230,7 @@ objects::Fan fan_;
 glm::mat4 fanPlacement = glm::translate(glm::mat4(1.0f), {3.9f, 2.4f, -1.0f});
 fanPlacement = glm::rotate(fanPlacement, glm::radians(-90.0f), {0.0f, 1.0f, 0.0f});
 const SceneNode& fan = fan_.addTo(root_, fanPlacement);
-targets_.push_back({"ventilador", &fan, {2.5f, 2.0f, 0.0f}, {3.9f, 2.4f, -1.0f}});  // tecla = posição na lista
+targets_.push_back({"ventilador", &fan, {2.5f, 2.0f, 0.0f}, {3.9f, 2.4f, -1.0f}});  // tecla = posição na lista + 2
 
 // src/scene/classroom.cpp, em Classroom::update
 if (input.keyPressed(GLFW_KEY_V)) {
@@ -272,7 +272,7 @@ para a CG-72.
 | --- | --- | --- | --- |
 | R1 | `git mv` dos módulos para `core/` (input, camera) e `gfx/` (vertex, mesh, primitives, scene_node, shader, texture, renderer); includes viram `"gfx/mesh.hpp"` e os guards ganham a pasta (`AULA_OPENGL_GFX_MESH_HPP`). | P5 | feito (CG-87) |
 | R2 | Cria `scene/classroom` com a cena de exemplo atual (dona dos meshes, da textura e da árvore). O renderer passa a só desenhar: `renderer::draw(const Camera&, const SceneNode& root, const Texture* texture)`, sem globais de conteúdo. A textura única é provisória até o R4. | P1 | feito (CG-87) |
-| R3 | Inspeção vira uma lista de alvos `{nome, nó, enquadramento}` em `Classroom`; teclas `0` (sala inteira) e `1`–`9` (cada alvo). `update` do `main.cpp` chama `classroom.update(input, deltaTime)` (interações e animação) e `classroom.handleInspection(input, camera)`. | P2, P3 | feito (CG-87) |
+| R3 | Inspeção vira uma lista de alvos `{nome, nó, enquadramento}` em `Classroom`; teclas `1` (sala inteira) e `2`–`9` (cada alvo), mantendo `1`/`2`/`3` da CG-55. `update` do `main.cpp` chama `classroom.update(input, deltaTime)` (interações e animação) e `classroom.handleInspection(input, camera)`. | P2, P3 | feito (CG-87) |
 | R4 | Junto com a CG-72: `Material` (cor, textura, brilho) em `gfx/`, ponteiro `const Material* material` no `SceneNode`, aplicado no `SceneNode::draw`. Remove o parâmetro `texture` do `renderer::draw` e a textura de `Classroom`. | P4 | pendente |
 
 ## 6. Detalhes dos módulos
@@ -316,8 +316,8 @@ com a proporção atual do framebuffer e suspende o desenho quando a largura ou 
 na câmera. O movimento combinado é normalizado e usa `deltaTime`; o delta do mouse **não** usa
 `deltaTime`. Não há colisões, gravidade ou limite de deslocamento.
 
-A inspeção fica em `scene::Classroom` (CG-87): `0` mostra a sala inteira e `1` a `9` isolam cada alvo registrado, na
-ordem da lista (hoje `1` = cubo e `2` = objeto articulado). Funciona com a janela em foco, mesmo com o cursor livre, e
+A inspeção fica em `scene::Classroom` (CG-87): `1` mostra a sala inteira e `2` a `9` isolam cada alvo registrado, na
+ordem da lista (hoje `2` = cubo e `3` = objeto articulado). Funciona com a janela em foco, mesmo com o cursor livre, e
 restaura um enquadramento para cada alvo; tecla sem alvo é ignorada. Depois a câmera continua livre. A perda de foco libera o cursor e exige
 novo clique para retomar a navegação; com o cursor livre não há movimento nem rotação pelo mouse.
 

@@ -39,8 +39,8 @@ public:
     // Teclas das interações e animações. Uma vez por frame, com a janela em foco.
     void update(const Input& input, float deltaTime);
 
-    // Tecla 0 mostra a sala inteira; 1 a 9, cada alvo isolado, na ordem em que foram
-    // registrados. Reenquadra a câmera, que depois continua livre. Retorna true se reenquadrou
+    // Tecla 1 mostra a sala inteira; 2 a 9, cada alvo isolado, na ordem em que foram
+    // registrados (cabem 8 alvos). Reenquadra a câmera, que depois continua livre. Retorna true se reenquadrou
     // neste frame (o chamador não aplica movimento pendente).
     bool handleInspection(const Input& input, Camera& camera);
 
