@@ -13,7 +13,7 @@
 //  normal     glm::vec3   1  (aNormal)         direção "para fora" da superfície (iluminação)
 //  uv         glm::vec2   2  (aUV)             coordenada de textura, de (0,0) a (1,1)
 //
-//  Regras para quem modela (convenções do CLAUDE.md):
+//  Regras para quem modela (convenções completas em docs/CONVENCOES.md):
 //   - 1 unidade = 1 metro, eixo Y para cima.
 //   - Coordenadas no espaço do PRÓPRIO objeto, com o pivô na origem: na base do objeto
 //     por padrão, ou no ponto da transformação (centro das hélices, topo da tela).
