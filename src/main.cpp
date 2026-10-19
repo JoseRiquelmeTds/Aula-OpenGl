@@ -8,6 +8,7 @@
 #include "core/camera.hpp"
 #include "core/input.hpp"
 #include "gfx/renderer.hpp"
+#include "scene/classroom.hpp"
 
 namespace {
 
@@ -22,7 +23,7 @@ void onGlfwError(int code, const char* description) {
     std::fprintf(stderr, "GLFW (%d): %s\n", code, description);
 }
 
-void update(GLFWwindow* window, Input& input, Camera& camera, float deltaTime) {
+void update(GLFWwindow* window, Input& input, Camera& camera, scene::Classroom& classroom, float deltaTime) {
     if (input.keyPressed(GLFW_KEY_Q)) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     } else if (input.keyPressed(GLFW_KEY_ESCAPE)) {
@@ -39,18 +40,10 @@ void update(GLFWwindow* window, Input& input, Camera& camera, float deltaTime) {
         return;
     }
 
-    // Atalhos de inspeção também funcionam com o cursor livre. Cada seleção
-    // restaura o enquadramento; não aplica movimento pendente nesse frame.
-    if (input.keyPressed(GLFW_KEY_1)) {
-        renderer::selectInspection(renderer::InspectionMode::Scene, camera);
-        return;
-    }
-    if (input.keyPressed(GLFW_KEY_2)) {
-        renderer::selectInspection(renderer::InspectionMode::Cube, camera);
-        return;
-    }
-    if (input.keyPressed(GLFW_KEY_3)) {
-        renderer::selectInspection(renderer::InspectionMode::Articulated, camera);
+    // Teclas da cena (interações, animações e inspeção) também funcionam com o cursor livre.
+    // A inspeção restaura o enquadramento; não aplica movimento pendente nesse frame.
+    classroom.update(input, deltaTime);
+    if (classroom.handleInspection(input, camera)) {
         return;
     }
 
@@ -111,6 +104,7 @@ int main() {
     {
         Input input(window);
         Camera camera;
+        scene::Classroom classroom;  // cria meshes e texturas: precisa do contexto, sai antes da janela
         constexpr double kMaxDeltaTime = 0.1;  // descarta o excesso de pausas longas
         double previousTime = glfwGetTime();
         bool firstFrame = true;
@@ -128,11 +122,11 @@ int main() {
             previousTime = currentTime;
             firstFrame = false;
 
-            update(window, input, camera, deltaTime);
+            update(window, input, camera, classroom, deltaTime);
             if (glfwWindowShouldClose(window)) {
                 break;
             }
-            renderer::draw(camera);
+            renderer::draw(camera, classroom.root(), &classroom.texture());
             glfwSwapBuffers(window);
         }
     }

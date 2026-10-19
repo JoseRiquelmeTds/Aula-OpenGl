@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -51,6 +52,10 @@ public:
     // Desenha esta peça e todos os descendentes. Chamar com o shader já em uso (shader.use()).
     // Define o uniform "uModel" de cada peça antes de desenhá-la.
     void draw(const Shader& shader, const glm::mat4& parentModel = glm::mat4(1.0f)) const;
+
+    // Filhos diretos, na ordem em que foram criados (ex.: a inspeção esconde todos menos um).
+    std::size_t childCount() const { return children_.size(); }
+    SceneNode& child(std::size_t index) { return *children_[index]; }
 
     const Mesh* mesh;
     glm::mat4 transform;
