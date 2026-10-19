@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "camera.hpp"
 #include "input.hpp"
 #include "renderer.hpp"
 
@@ -21,8 +22,7 @@ void onGlfwError(int code, const char* description) {
     std::fprintf(stderr, "GLFW (%d): %s\n", code, description);
 }
 
-// Ponto de atualização dos módulos (CG-55 receberá input e deltaTime em segundos).
-void update(GLFWwindow* window, Input& input, float /*deltaTime*/) {
+void update(GLFWwindow* window, Input& input, Camera& camera, float deltaTime) {
     if (input.keyPressed(GLFW_KEY_Q)) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     } else if (input.keyPressed(GLFW_KEY_ESCAPE)) {
@@ -34,6 +34,36 @@ void update(GLFWwindow* window, Input& input, float /*deltaTime*/) {
     } else if (input.mousePressed(GLFW_MOUSE_BUTTON_LEFT)) {
         input.setCursorCaptured(true);
     }
+
+    if (glfwWindowShouldClose(window) || !input.isFocused()) {
+        return;
+    }
+
+    // Atalhos de inspeção também funcionam com o cursor livre. Cada seleção
+    // restaura o enquadramento; não aplica movimento pendente nesse frame.
+    if (input.keyPressed(GLFW_KEY_1)) {
+        renderer::selectInspection(renderer::InspectionMode::Scene, camera);
+        return;
+    }
+    if (input.keyPressed(GLFW_KEY_2)) {
+        renderer::selectInspection(renderer::InspectionMode::Cube, camera);
+        return;
+    }
+    if (input.keyPressed(GLFW_KEY_3)) {
+        renderer::selectInspection(renderer::InspectionMode::Articulated, camera);
+        return;
+    }
+
+    if (!input.isCursorCaptured() || input.focusChanged()) {
+        return;
+    }
+    const auto mouse = input.mouseDelta();
+    camera.rotate(static_cast<float>(mouse.x), static_cast<float>(mouse.y));
+    const glm::vec3 direction(
+        static_cast<float>(input.keyDown(GLFW_KEY_D)) - static_cast<float>(input.keyDown(GLFW_KEY_A)),
+        static_cast<float>(input.keyDown(GLFW_KEY_SPACE)) - static_cast<float>(input.keyDown(GLFW_KEY_LEFT_CONTROL)),
+        static_cast<float>(input.keyDown(GLFW_KEY_W)) - static_cast<float>(input.keyDown(GLFW_KEY_S)));
+    camera.move(direction, deltaTime);
 }
 
 void onFramebufferSize(GLFWwindow* /*window*/, int width, int height) {
@@ -80,6 +110,7 @@ int main() {
 
     {
         Input input(window);
+        Camera camera;
         constexpr double kMaxDeltaTime = 0.1;  // descarta o excesso de pausas longas
         double previousTime = glfwGetTime();
         bool firstFrame = true;
@@ -97,11 +128,11 @@ int main() {
             previousTime = currentTime;
             firstFrame = false;
 
-            update(window, input, deltaTime);
+            update(window, input, camera, deltaTime);
             if (glfwWindowShouldClose(window)) {
                 break;
             }
-            renderer::draw();
+            renderer::draw(camera);
             glfwSwapBuffers(window);
         }
     }

@@ -107,7 +107,25 @@ O primeiro frame, frames sem foco e frames com transição de foco recebem zero.
 o intervalo real é limitado a `[0, 0.1]` segundo: o excesso de uma pausa longa é descartado, sem acumular
 recuperação nos próximos frames. Não há passo fixo nem cálculo baseado em FPS.
 
-A futura CG-55 poderá consultar `keyDown(...)` e usar `velocidade * deltaTime` para deslocamentos,
-além de aplicar `mouseDelta()` à orientação enquanto `isCursorCaptured()` for verdadeiro. O delta do mouse
-já representa deslocamento acumulado e **não** deve ser multiplicado por `deltaTime`. O ponto `update`
-está preparado para receber essa câmera; esta etapa mantém a câmera fixa e a cena de teste existentes.
+## Câmera livre e inspeção (CG-55)
+
+| Controle | Ação |
+| --- | --- |
+| Clique esquerdo | Captura o cursor e ativa a navegação com a janela em foco |
+| `W` / `S` | Avança / recua na direção da câmera, incluindo a inclinação |
+| `A` / `D` | Move para a esquerda / direita |
+| `Espaço` / `Ctrl esquerdo` | Sobe / desce no eixo Y do mundo |
+| Mouse capturado | Gira horizontalmente (yaw) e verticalmente (pitch limitado a ±89°) |
+| `1` / `2` / `3` | Cena completa / cubo isolado / objeto articulado isolado |
+| `Esc` / `Q` | Mantêm os atalhos descritos acima |
+
+A seleção funciona com a janela em foco, mesmo com o cursor livre, e restaura um enquadramento
+inicial para cada modo. Depois a câmera continua livre. A perda de foco libera o cursor e exige
+novo clique para retomar a navegação; com o cursor livre não há movimento nem rotação pelo mouse.
+
+`Camera` (`include/camera.hpp`, `src/camera.cpp`) guarda posição e orientação e calcula view/projeção
+sem depender do GLFW. `update` conecta o `Input` à câmera; `renderer::draw(camera)` usa suas matrizes
+com a proporção atual do framebuffer e suspende o desenho quando a largura ou altura é zero.
+`movementSpeed` (padrão **2 unidades/s**) e `mouseSensitivity` (**0,1 grau/pixel**) são configuráveis
+na câmera. O movimento combinado é normalizado e usa `deltaTime`; o delta do mouse **não** usa
+`deltaTime`. Não há colisões, gravidade ou limite de deslocamento.
