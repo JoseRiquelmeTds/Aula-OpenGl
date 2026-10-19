@@ -1,9 +1,11 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
+#include "input.hpp"
 #include "renderer.hpp"
 
 namespace {
@@ -19,9 +21,18 @@ void onGlfwError(int code, const char* description) {
     std::fprintf(stderr, "GLFW (%d): %s\n", code, description);
 }
 
-void onKey(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
-    if (action == GLFW_PRESS && (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)) {
+// Ponto de atualização dos módulos (CG-55 receberá input e deltaTime em segundos).
+void update(GLFWwindow* window, Input& input, float /*deltaTime*/) {
+    if (input.keyPressed(GLFW_KEY_Q)) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    } else if (input.keyPressed(GLFW_KEY_ESCAPE)) {
+        if (input.isCursorCaptured()) {
+            input.setCursorCaptured(false);
+        } else {
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
+    } else if (input.mousePressed(GLFW_MOUSE_BUTTON_LEFT)) {
+        input.setCursorCaptured(true);
     }
 }
 
@@ -59,7 +70,6 @@ int main() {
     std::printf("OpenGL %s | %s\n", reinterpret_cast<const char*>(glGetString(GL_VERSION)),
                 reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
-    glfwSetKeyCallback(window, onKey);
     glfwSetFramebufferSizeCallback(window, onFramebufferSize);
 
     renderer::init();
@@ -68,10 +78,32 @@ int main() {
     glfwGetFramebufferSize(window, &width, &height);
     renderer::resize(width, height);
 
-    while (!glfwWindowShouldClose(window)) {
-        renderer::draw();
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+    {
+        Input input(window);
+        constexpr double kMaxDeltaTime = 0.1;  // descarta o excesso de pausas longas
+        double previousTime = glfwGetTime();
+        bool firstFrame = true;
+
+        while (!glfwWindowShouldClose(window)) {
+            input.beginFrame();
+            glfwPollEvents();
+
+            // Medido após o poll: inclui também esperas do sistema (ex.: resize).
+            const double currentTime = glfwGetTime();
+            const float deltaTime = firstFrame || !input.isFocused() || input.focusChanged()
+                                        ? 0.0f
+                                        : static_cast<float>(std::clamp(currentTime - previousTime,
+                                                                        0.0, kMaxDeltaTime));
+            previousTime = currentTime;
+            firstFrame = false;
+
+            update(window, input, deltaTime);
+            if (glfwWindowShouldClose(window)) {
+                break;
+            }
+            renderer::draw();
+            glfwSwapBuffers(window);
+        }
     }
 
     renderer::shutdown();

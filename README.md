@@ -76,3 +76,38 @@ build/            gerado pelo CMake: build/<preset>/
 ```
 
 Detalhes do fluxo de build e como adicionar módulos: [docs/SETUP.md § Estrutura do projeto](docs/SETUP.md#6-estrutura-do-projeto).
+
+## Input e atualização por frame (CG-54)
+
+`Input` (`include/input.hpp`, `src/input.cpp`) acompanha uma janela GLFW. O loop chama
+`input.beginFrame()` antes de `glfwPollEvents()` e depois entrega o estado a `update` em `src/main.cpp`.
+Todos os módulos podem consultar o mesmo frame, sem consumir os eventos:
+
+| Consulta | Resultado |
+| --- | --- |
+| `keyDown(GLFW_KEY_...)` / `mouseDown(GLFW_MOUSE_BUTTON_...)` | Estado contínuo de tecla/botão |
+| `keyPressed(...)` / `mousePressed(...)` | Pressionamento neste frame, sem repetição automática; preservado mesmo se houver soltura no mesmo poll |
+| `mouseDelta()` | Movimento relativo acumulado no frame com cursor capturado; `x` para a direita, `y` para baixo |
+| `setCursorCaptured(bool)` / `isCursorCaptured()` | Controle/consulta da captura (`GLFW_CURSOR_DISABLED`) |
+| `isFocused()` / `focusChanged()` | Foco atual e ocorrência de transição neste frame |
+
+As consultas de teclas/botões inválidos retornam `false`. Os eventos de pressionamento e o delta do mouse
+duram até o próximo `beginFrame()`. O primeiro evento de posição após cada captura apenas estabelece a
+referência, evitando saltos. A perda ou recuperação de foco limpa os estados e o movimento pendente;
+o cursor volta livre e exige novo clique para capturar. Teclas mantidas antes da perda de foco exigem
+novo pressionamento ao retornar.
+
+Os atalhos ficam em `update`: clique esquerdo captura, `Esc` libera a captura ou fecha se o cursor já estiver
+livre, e `Q` fecha sempre. `Input` não conhece esses atalhos. Ele usa o user pointer e os callbacks de teclado,
+botões, posição e foco da janela; outros módulos devem usar sua interface sem substituir esses callbacks.
+O callback de framebuffer continua independente. O objeto deve ser destruído antes da janela.
+
+`update` recebe `deltaTime` em **segundos**, medido com `glfwGetTime()` após o poll e antes do desenho.
+O primeiro frame, frames sem foco e frames com transição de foco recebem zero. Nos demais frames,
+o intervalo real é limitado a `[0, 0.1]` segundo: o excesso de uma pausa longa é descartado, sem acumular
+recuperação nos próximos frames. Não há passo fixo nem cálculo baseado em FPS.
+
+A futura CG-55 poderá consultar `keyDown(...)` e usar `velocidade * deltaTime` para deslocamentos,
+além de aplicar `mouseDelta()` à orientação enquanto `isCursorCaptured()` for verdadeiro. O delta do mouse
+já representa deslocamento acumulado e **não** deve ser multiplicado por `deltaTime`. O ponto `update`
+está preparado para receber essa câmera; esta etapa mantém a câmera fixa e a cena de teste existentes.
