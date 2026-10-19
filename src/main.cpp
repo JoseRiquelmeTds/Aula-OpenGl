@@ -1,9 +1,12 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
+#include "camera.hpp"
+#include "input.hpp"
 #include "renderer.hpp"
 
 namespace {
@@ -19,10 +22,48 @@ void onGlfwError(int code, const char* description) {
     std::fprintf(stderr, "GLFW (%d): %s\n", code, description);
 }
 
-void onKey(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
-    if (action == GLFW_PRESS && (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)) {
+void update(GLFWwindow* window, Input& input, Camera& camera, float deltaTime) {
+    if (input.keyPressed(GLFW_KEY_Q)) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    } else if (input.keyPressed(GLFW_KEY_ESCAPE)) {
+        if (input.isCursorCaptured()) {
+            input.setCursorCaptured(false);
+        } else {
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
+        }
+    } else if (input.mousePressed(GLFW_MOUSE_BUTTON_LEFT)) {
+        input.setCursorCaptured(true);
     }
+
+    if (glfwWindowShouldClose(window) || !input.isFocused()) {
+        return;
+    }
+
+    // Atalhos de inspeção também funcionam com o cursor livre. Cada seleção
+    // restaura o enquadramento; não aplica movimento pendente nesse frame.
+    if (input.keyPressed(GLFW_KEY_1)) {
+        renderer::selectInspection(renderer::InspectionMode::Scene, camera);
+        return;
+    }
+    if (input.keyPressed(GLFW_KEY_2)) {
+        renderer::selectInspection(renderer::InspectionMode::Cube, camera);
+        return;
+    }
+    if (input.keyPressed(GLFW_KEY_3)) {
+        renderer::selectInspection(renderer::InspectionMode::Articulated, camera);
+        return;
+    }
+
+    if (!input.isCursorCaptured() || input.focusChanged()) {
+        return;
+    }
+    const auto mouse = input.mouseDelta();
+    camera.rotate(static_cast<float>(mouse.x), static_cast<float>(mouse.y));
+    const glm::vec3 direction(
+        static_cast<float>(input.keyDown(GLFW_KEY_D)) - static_cast<float>(input.keyDown(GLFW_KEY_A)),
+        static_cast<float>(input.keyDown(GLFW_KEY_SPACE)) - static_cast<float>(input.keyDown(GLFW_KEY_LEFT_CONTROL)),
+        static_cast<float>(input.keyDown(GLFW_KEY_W)) - static_cast<float>(input.keyDown(GLFW_KEY_S)));
+    camera.move(direction, deltaTime);
 }
 
 void onFramebufferSize(GLFWwindow* /*window*/, int width, int height) {
@@ -59,7 +100,6 @@ int main() {
     std::printf("OpenGL %s | %s\n", reinterpret_cast<const char*>(glGetString(GL_VERSION)),
                 reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
 
-    glfwSetKeyCallback(window, onKey);
     glfwSetFramebufferSizeCallback(window, onFramebufferSize);
 
     renderer::init();
@@ -68,10 +108,33 @@ int main() {
     glfwGetFramebufferSize(window, &width, &height);
     renderer::resize(width, height);
 
-    while (!glfwWindowShouldClose(window)) {
-        renderer::draw();
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+    {
+        Input input(window);
+        Camera camera;
+        constexpr double kMaxDeltaTime = 0.1;  // descarta o excesso de pausas longas
+        double previousTime = glfwGetTime();
+        bool firstFrame = true;
+
+        while (!glfwWindowShouldClose(window)) {
+            input.beginFrame();
+            glfwPollEvents();
+
+            // Medido após o poll: inclui também esperas do sistema (ex.: resize).
+            const double currentTime = glfwGetTime();
+            const float deltaTime = firstFrame || !input.isFocused() || input.focusChanged()
+                                        ? 0.0f
+                                        : static_cast<float>(std::clamp(currentTime - previousTime,
+                                                                        0.0, kMaxDeltaTime));
+            previousTime = currentTime;
+            firstFrame = false;
+
+            update(window, input, camera, deltaTime);
+            if (glfwWindowShouldClose(window)) {
+                break;
+            }
+            renderer::draw(camera);
+            glfwSwapBuffers(window);
+        }
     }
 
     renderer::shutdown();

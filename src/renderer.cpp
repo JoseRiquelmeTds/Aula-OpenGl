@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "camera.hpp"
 #include "mesh.hpp"
 #include "primitives.hpp"
 #include "scene_node.hpp"
@@ -22,6 +23,7 @@ constexpr int kDebugMode = 3;
 
 std::unique_ptr<Shader> basicShader;
 float aspectRatio = 1.0f;
+bool drawable = false;
 
 // --- Exemplo de uso do Mesh, das primitivas e do SceneNode --------------------
 // Cena provisória só para conferir a estrutura de mesh. Sai daqui quando a montagem da
@@ -34,6 +36,10 @@ std::unique_ptr<Mesh> baseMesh;
 std::unique_ptr<Mesh> rodMesh;
 std::unique_ptr<Mesh> armMesh;
 std::unique_ptr<SceneNode> scene;
+// Referências não proprietárias aos filhos da raiz, válidas enquanto scene existir.
+SceneNode* floorNode = nullptr;
+SceneNode* cubeNode = nullptr;
+SceneNode* articulatedNode = nullptr;
 
 // Textura de teste: o vermelho cresce com u (para a direita) e o verde com v (para cima),
 // as mesmas cores do kDebugMode = 2. Se aparecer verde embaixo, a imagem está de cabeça
@@ -50,16 +56,17 @@ void createExampleScene() {
 
     // Raiz vazia: a cena inteira é um objeto composto.
     scene = std::make_unique<SceneNode>();
-    scene->addChild(floorMesh.get());
+    floorNode = &scene->addChild(floorMesh.get());
 
     // Peça simples: model = T · R (sem escala, o mesh já foi criado no tamanho real).
     glm::mat4 cubeTransform = glm::translate(glm::mat4(1.0f), glm::vec3(-0.8f, 0.0f, 0.0f));
     cubeTransform = glm::rotate(cubeTransform, glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    scene->addChild(cubeMesh.get(), cubeTransform);
+    cubeNode = &scene->addChild(cubeMesh.get(), cubeTransform);
 
     // Objeto composto: base -> haste -> articulação (sem mesh) -> braço.
     // Mover a base leva todo o resto junto; girar a articulação só mexe no braço.
     SceneNode& base = scene->addChild(baseMesh.get(), glm::translate(glm::mat4(1.0f), glm::vec3(0.8f, 0.0f, 0.0f)));
+    articulatedNode = &base;
     SceneNode& rod = base.addChild(rodMesh.get(), glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.05f, 0.0f)));
 
     // Pivô no topo da haste (y = 1 no espaço da haste), girado 45° em Y e 20° para cima em Z.
@@ -78,6 +85,9 @@ void createExampleScene() {
 void destroyExampleScene() {
     testTexture.reset();
     // As peças primeiro: elas apontam para os meshes.
+    floorNode = nullptr;
+    cubeNode = nullptr;
+    articulatedNode = nullptr;
     scene.reset();
     armMesh.reset();
     rodMesh.reset();
@@ -96,20 +106,36 @@ void init() {
     createExampleScene();
 }
 
-void draw() {
+void selectInspection(InspectionMode mode, Camera& camera) {
+    floorNode->visible = mode == InspectionMode::Scene;
+    cubeNode->visible = mode != InspectionMode::Articulated;
+    articulatedNode->visible = mode != InspectionMode::Cube;
+
+    switch (mode) {
+        case InspectionMode::Scene:
+            camera.lookAt({2.0f, 2.0f, 3.0f}, {0.0f, 0.4f, 0.0f});
+            break;
+        case InspectionMode::Cube:
+            camera.lookAt({0.2f, 1.0f, 1.5f}, {-0.8f, 0.3f, 0.0f});
+            break;
+        case InspectionMode::Articulated:
+            camera.lookAt({2.0f, 1.4f, 2.0f}, {0.9f, 0.6f, 0.0f});
+            break;
+    }
+}
+
+void draw(const Camera& camera) {
+    if (!drawable) {
+        return;  // framebuffer minimizado ou ainda sem tamanho válido
+    }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (!basicShader->isValid()) {
         return;  // o erro de compilação/link já foi impresso no console
     }
 
-    // Câmera fixa provisória (a câmera livre é outra task): olhando a cena de exemplo de cima.
-    const glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 3.0f), glm::vec3(0.0f, 0.4f, 0.0f),
-                                       glm::vec3(0.0f, 1.0f, 0.0f));
-    const glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRatio, 0.1f, 100.0f);
-
     basicShader->use();
-    basicShader->setMat4("uView", view);
-    basicShader->setMat4("uProjection", projection);
+    basicShader->setMat4("uView", camera.view());
+    basicShader->setMat4("uProjection", camera.projection(aspectRatio));
     basicShader->setInt("uDebugMode", kDebugMode);
     basicShader->setVec3("uColor", glm::vec3(0.8f, 0.5f, 0.2f));
 
@@ -123,7 +149,8 @@ void draw() {
 
 void resize(int width, int height) {
     glViewport(0, 0, width, height);
-    if (height > 0) {  // janela minimizada tem altura 0
+    drawable = width > 0 && height > 0;
+    if (drawable) {
         aspectRatio = static_cast<float>(width) / static_cast<float>(height);
     }
 }

@@ -156,7 +156,9 @@ cmake --build --preset linux --target run     # compila e abre a janela
 ```
 
 Deve abrir uma janela **"Aula OpenGL"** com fundo azul-escuro, e o terminal mostra a versão do OpenGL e a placa de vídeo usada.
-`Esc` ou `q` fecha. A primeira compilação demora mais porque compila o GLFW e o GLAD. As próximas reaproveitam.
+Clique esquerdo na janela captura o cursor. `Esc` libera o cursor capturado; com o cursor livre, `Esc` fecha.
+`Q` fecha em ambos os modos. Ao perder foco, a janela libera o cursor; ao voltar, clique novamente para capturar.
+A primeira compilação demora mais porque compila o GLFW e o GLAD. As próximas reaproveitam.
 
 | Comando | O que faz |
 | --- | --- |
