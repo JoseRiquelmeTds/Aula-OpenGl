@@ -50,6 +50,15 @@ Classroom::Classroom()
     // em vez de atravessá-lo, e 0,02 m para baixo para o eixo do braço passar pelo pivô.
     joint.addChild(&armMesh_, glm::translate(glm::mat4(1.0f), glm::vec3(0.25f, -0.02f, 0.0f)));
     targets_.push_back({"objeto articulado", &base, {2.0f, 1.4f, 2.0f}, {0.9f, 0.6f, 0.0f}});
+
+    // Posição provisória para testes. A montagem final poderá mudar só esta matriz T · R.
+    glm::mat4 fanPlacement = glm::translate(glm::mat4(1.0f), glm::vec3(-0.2f, 1.2f, -0.7f));
+    fanPlacement = glm::rotate(fanPlacement, glm::radians(15.0f), glm::vec3(0, 1, 0));
+    const SceneNode& fan = fan_.addTo(root_, fanPlacement);
+    // Enquadramentos no espaço do objeto acompanham também uma futura mudança de orientação.
+    const glm::vec3 fanEye = glm::vec3(fanPlacement * glm::vec4(0.48f, 0.40f, 1.10f, 1.0f));
+    const glm::vec3 fanCenter = glm::vec3(fanPlacement * glm::vec4(0, 0.13f, 0.23f, 1.0f));
+    targets_.push_back({"ventilador", &fan, fanEye, fanCenter});  // tecla 4; preserva 2 e 3
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {
