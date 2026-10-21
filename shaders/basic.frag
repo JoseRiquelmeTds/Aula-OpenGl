@@ -14,7 +14,7 @@ out vec4 FragColor;
 uniform int uDebugMode;
 uniform vec3 uColor;
 
-// Textura ligada na unidade indicada por setInt("uTexture", unidade) (veja include/texture.hpp).
+// Textura ligada na unidade indicada por setInt("uTexture", unidade) (veja include/gfx/texture.hpp).
 uniform sampler2D uTexture;
 
 void main() {

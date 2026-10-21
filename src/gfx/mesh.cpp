@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+#include "gfx/mesh.hpp"
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
     : indexCount_(static_cast<GLsizei>(indices.size())) {

@@ -1,4 +1,4 @@
-#include "primitives.hpp"
+#include "gfx/primitives.hpp"
 
 #include <glm/gtc/constants.hpp>
 

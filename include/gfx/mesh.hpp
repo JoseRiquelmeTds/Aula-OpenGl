@@ -1,11 +1,11 @@
-#ifndef AULA_OPENGL_MESH_HPP
-#define AULA_OPENGL_MESH_HPP
+#ifndef AULA_OPENGL_GFX_MESH_HPP
+#define AULA_OPENGL_GFX_MESH_HPP
 
 #include <glad/gl.h>
 
 #include <vector>
 
-#include "vertex.hpp"
+#include "gfx/vertex.hpp"
 
 // =============================================================================
 //  Mesh: geometria na GPU (VAO + VBO + EBO). TODO objeto da cena é desenhado por aqui.
@@ -27,7 +27,7 @@
 //      caixa.draw();
 //
 //  Para montar um objeto de várias peças, cada uma com sua transformação, use SceneNode
-//  (include/scene_node.hpp). Primitivas prontas (caixa, cilindro, plano): include/primitives.hpp.
+//  (include/gfx/scene_node.hpp). Primitivas prontas (caixa, cilindro, plano): include/gfx/primitives.hpp.
 
 // Geometria ainda na CPU: o que as primitivas geram e o que o construtor do Mesh recebe.
 // Por ficar na CPU, dá para editar (mover vértices, ajustar UVs) antes de enviar à GPU.
@@ -60,4 +60,4 @@ private:
     GLsizei indexCount_ = 0;
 };
 
-#endif  // AULA_OPENGL_MESH_HPP
+#endif  // AULA_OPENGL_GFX_MESH_HPP

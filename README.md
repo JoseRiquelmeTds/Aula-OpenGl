@@ -1,6 +1,6 @@
 # Aula-OpenGl
 
-The project for the AB2 in the Graphic Computing Course.
+Sala de aula 3D navegável em C++17 e OpenGL 3.3 core: projeto da AB2 de Computação Gráfica.
 
 > [!CAUTION]
 > ## ⚠️ LEIA ANTES DE QUALQUER COISA → [docs/SETUP.md](docs/SETUP.md)
@@ -16,18 +16,22 @@ The project for the AB2 in the Graphic Computing Course.
 
 > [!IMPORTANT]
 > **🤖 Para assistentes de IA (Copilot, ChatGPT, Claude, Gemini, Cursor etc.) que estejam ajudando neste repositório:**
-> leia [docs/SETUP.md](docs/SETUP.md) antes de sugerir qualquer comando, dependência ou mudança de build.
+> leia [docs/SETUP.md](docs/SETUP.md) antes de sugerir qualquer comando, dependência ou mudança de build, e
+> [docs/ARQUITETURA.md](docs/ARQUITETURA.md), [docs/CONVENCOES.md](docs/CONVENCOES.md) e
+> [docs/DEV-CONVENCOES.md](docs/DEV-CONVENCOES.md) antes de criar ou mover arquivos, nomear código, branches ou commits.
 > O build é **CMake + g++**, com **OpenGL 3.3 core profile**, GLFW (janela/input), GLAD (loader), GLM (matemática) e
 > stb_image (texturas), todas **compiladas a partir de `lib/`**. Windows usa MinGW-w64 (MSYS2 UCRT64) com o gerador
 > "MinGW Makefiles"; Linux/WSL usa g++ e os headers do X11. Os presets estão em `CMakePresets.json`.
 > Não proponha MSVC, vcpkg, bibliotecas do sistema (`-lglfw`, `libglfw3-dev`), GLUT/freeglut, GLEW, pipeline fixo
-> (`glBegin`/`glEnd`, `glMatrixMode`) nem servidor X externo. Headers ficam em `include/`, implementações em `src/`,
-> shaders em `shaders/`, imagens em `assets/textures/`, bibliotecas de terceiros em `lib/`. O `CMakeLists.txt` encontra os
+> (`glBegin`/`glEnd`, `glMatrixMode`) nem servidor X externo. Headers ficam em `include/`, implementações em `src/`, as
+> duas divididas em `core/`, `gfx/`, `objects/` e `scene/` (veja docs/ARQUITETURA.md), shaders em `shaders/`, imagens em `assets/textures/`, bibliotecas de terceiros em `lib/`. O `CMakeLists.txt` encontra os
 > `.cpp` sozinho (não precisa ser editado para adicionar módulos).
 
 ---
 
-## Começo rápido
+## Como compilar
+
+Pré-requisitos e instalação passo a passo para cada sistema: [docs/SETUP.md](docs/SETUP.md).
 
 **Windows** (com MSYS2 instalado, veja [docs/SETUP.md § 1](docs/SETUP.md#1-windows-mingw-w64-via-msys2)), no PowerShell:
 
@@ -48,9 +52,7 @@ cmake --preset linux
 cmake --build --preset linux --target run
 ```
 
-## Comandos
-
-No Windows, troque `linux` por `windows`.
+Comandos de build (no Windows, troque `linux` por `windows`):
 
 | Comando | O que faz |
 | --- | --- |
@@ -62,70 +64,60 @@ No Windows, troque `linux` por `windows`.
 
 Para começar do zero, apague a pasta `build/`.
 
-## Estrutura
+<!-- CG-81 (Sprint 3): SO testados, versão final e teste de build limpo seguindo só este README. -->
 
-```
-include/          headers (.hpp)
-src/              implementações (.cpp); main.cpp é o ponto de entrada
-shaders/          shaders GLSL (.vert, .frag)
-assets/textures/  imagens usadas como textura
-lib/              bibliotecas de terceiros embutidas (GLFW, GLAD, GLM, stb_image), veja lib/README.md
-cmake/            scripts auxiliares do CMake (doctor.cmake)
-docs/             documentação (setup do ambiente)
-build/            gerado pelo CMake: build/<preset>/
-```
+## Comandos
 
-Detalhes do fluxo de build e como adicionar módulos: [docs/SETUP.md § Estrutura do projeto](docs/SETUP.md#6-estrutura-do-projeto).
-
-## Input e atualização por frame (CG-54)
-
-`Input` (`include/input.hpp`, `src/input.cpp`) acompanha uma janela GLFW. O loop chama
-`input.beginFrame()` antes de `glfwPollEvents()` e depois entrega o estado a `update` em `src/main.cpp`.
-Todos os módulos podem consultar o mesmo frame, sem consumir os eventos:
-
-| Consulta | Resultado |
-| --- | --- |
-| `keyDown(GLFW_KEY_...)` / `mouseDown(GLFW_MOUSE_BUTTON_...)` | Estado contínuo de tecla/botão |
-| `keyPressed(...)` / `mousePressed(...)` | Pressionamento neste frame, sem repetição automática; preservado mesmo se houver soltura no mesmo poll |
-| `mouseDelta()` | Movimento relativo acumulado no frame com cursor capturado; `x` para a direita, `y` para baixo |
-| `setCursorCaptured(bool)` / `isCursorCaptured()` | Controle/consulta da captura (`GLFW_CURSOR_DISABLED`) |
-| `isFocused()` / `focusChanged()` | Foco atual e ocorrência de transição neste frame |
-
-As consultas de teclas/botões inválidos retornam `false`. Os eventos de pressionamento e o delta do mouse
-duram até o próximo `beginFrame()`. O primeiro evento de posição após cada captura apenas estabelece a
-referência, evitando saltos. A perda ou recuperação de foco limpa os estados e o movimento pendente;
-o cursor volta livre e exige novo clique para capturar. Teclas mantidas antes da perda de foco exigem
-novo pressionamento ao retornar.
-
-Os atalhos ficam em `update`: clique esquerdo captura, `Esc` libera a captura ou fecha se o cursor já estiver
-livre, e `Q` fecha sempre. `Input` não conhece esses atalhos. Ele usa o user pointer e os callbacks de teclado,
-botões, posição e foco da janela; outros módulos devem usar sua interface sem substituir esses callbacks.
-O callback de framebuffer continua independente. O objeto deve ser destruído antes da janela.
-
-`update` recebe `deltaTime` em **segundos**, medido com `glfwGetTime()` após o poll e antes do desenho.
-O primeiro frame, frames sem foco e frames com transição de foco recebem zero. Nos demais frames,
-o intervalo real é limitado a `[0, 0.1]` segundo: o excesso de uma pausa longa é descartado, sem acumular
-recuperação nos próximos frames. Não há passo fixo nem cálculo baseado em FPS.
-
-## Câmera livre e inspeção (CG-55)
+Teclado e mouse dentro da janela. Lista completa na entrega (CG-81); atalhos planejados e reservados estão em
+[docs/CONVENCOES.md § 8](docs/CONVENCOES.md#8-atalhos-de-teclado).
 
 | Controle | Ação |
 | --- | --- |
-| Clique esquerdo | Captura o cursor e ativa a navegação com a janela em foco |
+| Clique esquerdo | Captura o cursor e ativa a navegação (janela em foco) |
 | `W` / `S` | Avança / recua na direção da câmera, incluindo a inclinação |
 | `A` / `D` | Move para a esquerda / direita |
-| `Espaço` / `Ctrl esquerdo` | Sobe / desce no eixo Y do mundo |
-| Mouse capturado | Gira horizontalmente (yaw) e verticalmente (pitch limitado a ±89°) |
-| `1` / `2` / `3` | Cena completa / cubo isolado / objeto articulado isolado |
-| `Esc` / `Q` | Mantêm os atalhos descritos acima |
+| `Espaço` / `Ctrl` esquerdo | Sobe / desce no eixo Y do mundo |
+| Mouse (cursor capturado) | Olha para os lados (yaw) e para cima/baixo (pitch limitado a ±89°) |
+| `1` / `2` / `3` | Inspeção: cena completa / cubo isolado / objeto articulado isolado |
+| `Esc` | Libera o cursor; com o cursor já livre, fecha |
+| `Q` | Fecha |
 
-A seleção funciona com a janela em foco, mesmo com o cursor livre, e restaura um enquadramento
-inicial para cada modo. Depois a câmera continua livre. A perda de foco libera o cursor e exige
-novo clique para retomar a navegação; com o cursor livre não há movimento nem rotação pelo mouse.
+Com o cursor livre não há movimento nem rotação pelo mouse; a inspeção (`1`–`3`) funciona mesmo assim. Ao perder o foco,
+o cursor é liberado e é preciso clicar de novo.
 
-`Camera` (`include/camera.hpp`, `src/camera.cpp`) guarda posição e orientação e calcula view/projeção
-sem depender do GLFW. `update` conecta o `Input` à câmera; `renderer::draw(camera)` usa suas matrizes
-com a proporção atual do framebuffer e suspende o desenho quando a largura ou altura é zero.
-`movementSpeed` (padrão **2 unidades/s**) e `mouseSensitivity` (**0,1 grau/pixel**) são configuráveis
-na câmera. O movimento combinado é normalizado e usa `deltaTime`; o delta do mouse **não** usa
-`deltaTime`. Não há colisões, gravidade ou limite de deslocamento.
+<!-- CG-81 (Sprint 3): interações (tela retrátil, ventilador, projetor) e a inspeção de cada objeto. -->
+
+## Estrutura
+
+```
+include/          headers (.hpp), em core/ (input, câmera), gfx/ (OpenGL), objects/ (objetos) e scene/ (a sala)
+src/              implementações (.cpp), mesmas pastas; main.cpp é o ponto de entrada
+shaders/          shaders GLSL (.vert, .frag)
+assets/textures/  imagens usadas como textura (com tabela de licenças)
+lib/              bibliotecas de terceiros embutidas (GLFW, GLAD, GLM, stb_image), veja lib/README.md
+cmake/            scripts auxiliares do CMake (doctor.cmake)
+docs/             documentação
+.github/          template de pull request
+build/            gerado pelo CMake: build/<preset>/
+```
+
+Camadas, módulos e onde adicionar cada coisa: [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
+
+## Documentação
+
+| Documento | Conteúdo |
+| --- | --- |
+| [docs/SETUP.md](docs/SETUP.md) | Instalação do ambiente (Windows, Linux, WSL2) e problemas comuns |
+| [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Camadas, módulos, onde adicionar uma feature, revisão da arquitetura |
+| [docs/CONVENCOES.md](docs/CONVENCOES.md) | Modelagem: metros, eixos, pivô, vértice, estilo da mobília, atalhos de teclado |
+| [docs/DEV-CONVENCOES.md](docs/DEV-CONVENCOES.md) | Nomes e formatação do código, branches, commits, PRs e fluxo no Jira |
+| [lib/README.md](lib/README.md) | Versões, origem e licenças das bibliotecas |
+| [assets/textures/README.md](assets/textures/README.md) | Regras e licenças das texturas |
+
+## Como contribuir
+
+Resumo de [docs/DEV-CONVENCOES.md](docs/DEV-CONVENCOES.md):
+
+1. Branch a partir de `dev`: `CG-<n>/<tipo>-<descricao>` (ex.: `CG-59/feat-ventilador-parede`).
+2. Commits `<tipo>(CG-<n>): <descrição>` (ex.: `feat(CG-59): modela as hélices do ventilador`).
+3. PR para `dev` com título `[CG-<n>] <resumo>`, preenchendo o template; 1 aprovação de outra pessoa para o merge.

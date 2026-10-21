@@ -170,7 +170,7 @@ A primeira compilação demora mais porque compila o GLFW e o GLAD. As próximas
 | `cmake -P cmake/doctor.cmake` | Diagnóstico do ambiente |
 
 O executável fica em `build/<preset>/bin/aula-opengl` (`.exe` no Windows). O alvo `run` executa o programa **a partir da raiz
-do repositório**, então o código pode abrir arquivos com caminho relativo, como `shaders/basico.vert` ou `assets/textures/caixa.png`.
+do repositório**, então o código pode abrir arquivos com caminho relativo, como `shaders/basic.vert` ou `assets/textures/uv_teste.png`.
 Se rodar o executável de outro lugar (dois cliques, por exemplo), abra o terminal na raiz antes.
 
 Para começar do zero (depois de trocar de compilador, por exemplo), apague a pasta `build/` e configure de novo.
@@ -181,11 +181,13 @@ Para começar do zero (depois de trocar de compilador, por exemplo), apague a pa
 Aula-OpenGl/
 ├── CMakeLists.txt        # build do projeto
 ├── CMakePresets.json     # presets linux, linux-release, windows, windows-release
-├── include/              # headers (.hpp): só declarações
-│   └── renderer.hpp
-├── src/                  # implementações (.cpp)
-│   ├── main.cpp          # ponto de entrada (janela GLFW, GLAD, loop principal)
-│   └── renderer.cpp
+├── include/              # headers (.hpp): só declarações (módulos em docs/ARQUITETURA.md)
+│   ├── core/             # input e câmera (sem OpenGL)
+│   ├── gfx/              # mesh, shader, textura, primitivas, SceneNode, renderer
+│   ├── objects/          # um módulo por objeto da sala (a partir da Sprint 1)
+│   └── scene/            # classroom: monta a sala, inspeção, teclas das interações
+├── src/                  # implementações (.cpp), nas mesmas pastas de include/
+│   └── main.cpp          # ponto de entrada (janela GLFW, GLAD, loop principal)
 ├── shaders/              # shaders GLSL (#version 330 core)
 ├── assets/
 │   └── textures/         # imagens de textura (PNG/JPG, lidas com stb_image)
@@ -198,7 +200,12 @@ Aula-OpenGl/
 ├── cmake/
 │   └── doctor.cmake      # diagnóstico do ambiente
 ├── docs/
-│   └── SETUP.md          # este arquivo
+│   ├── SETUP.md          # este arquivo
+│   ├── ARQUITETURA.md    # camadas, módulos e onde adicionar cada coisa
+│   ├── CONVENCOES.md     # modelagem: metros, eixos, pivô, vértice, atalhos
+│   └── DEV-CONVENCOES.md # código, branches, commits e PRs
+├── .github/
+│   └── pull_request_template.md
 └── build/                # gerado pelo CMake, ignorado pelo git
     └── <preset>/
         ├── lib/          # libglfw3.a, libglad.a, libstb_image.a, libaula-opengl.a
@@ -212,9 +219,10 @@ Como o build funciona:
    e com acesso a `include/` e aos headers de todas as bibliotecas de `lib/`.
 3. O executável é `main.cpp` + `libaula-opengl.a` + as bibliotecas de `lib/`. No Windows ele é linkado com `-static`.
 
-**Para adicionar um módulo** (ex.: `camera`): crie `include/camera.hpp` e `src/camera.cpp`, depois `#include "camera.hpp"` onde precisar.
-**Não precisa editar o `CMakeLists.txt`.** Ele encontra os `.cpp` sozinho, inclusive em subpastas
-(`src/shapes/cubo.cpp` → `include/shapes/cubo.hpp`). Se o arquivo novo não entrar no build, rode `cmake --preset ...` de novo.
+**Para adicionar um módulo** (ex.: o ventilador): crie `include/objects/fan.hpp` e `src/objects/fan.cpp`, depois
+`#include "objects/fan.hpp"` onde precisar. Em qual pasta cada coisa fica: [ARQUITETURA.md § 4](ARQUITETURA.md#4-onde-adicionar-uma-feature).
+**Não precisa editar o `CMakeLists.txt`.** Ele encontra os `.cpp` sozinho, inclusive em subpastas.
+Se o arquivo novo não entrar no build, rode `cmake --preset ...` de novo.
 
 Nos `.cpp`, inclua `<glad/gl.h>` antes de qualquer outro header de OpenGL. Use só OpenGL **3.3 core**: nada de `glBegin`/`glEnd`,
 `glMatrixMode` ou `gluPerspective`. As matrizes vêm do GLM e o desenho é feito com VAO/VBO e shaders.

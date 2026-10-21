@@ -1,13 +1,14 @@
-#ifndef AULA_OPENGL_SCENE_NODE_HPP
-#define AULA_OPENGL_SCENE_NODE_HPP
+#ifndef AULA_OPENGL_GFX_SCENE_NODE_HPP
+#define AULA_OPENGL_GFX_SCENE_NODE_HPP
 
 #include <glm/glm.hpp>
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
-#include "mesh.hpp"
-#include "shader.hpp"
+#include "gfx/mesh.hpp"
+#include "gfx/shader.hpp"
 
 // =============================================================================
 //  SceneNode: uma peça de um objeto composto, com transformação própria e filhos.
@@ -52,6 +53,10 @@ public:
     // Define o uniform "uModel" de cada peça antes de desenhá-la.
     void draw(const Shader& shader, const glm::mat4& parentModel = glm::mat4(1.0f)) const;
 
+    // Filhos diretos, na ordem em que foram criados (ex.: a inspeção esconde todos menos um).
+    std::size_t childCount() const { return children_.size(); }
+    SceneNode& child(std::size_t index) { return *children_[index]; }
+
     const Mesh* mesh;
     glm::mat4 transform;
     bool visible = true;  // false esconde a peça e os filhos (ex.: tela totalmente recolhida)
@@ -62,4 +67,4 @@ private:
     std::vector<std::unique_ptr<SceneNode>> children_;
 };
 
-#endif  // AULA_OPENGL_SCENE_NODE_HPP
+#endif  // AULA_OPENGL_GFX_SCENE_NODE_HPP

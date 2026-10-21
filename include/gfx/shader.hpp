@@ -1,5 +1,5 @@
-#ifndef AULA_OPENGL_SHADER_HPP
-#define AULA_OPENGL_SHADER_HPP
+#ifndef AULA_OPENGL_GFX_SHADER_HPP
+#define AULA_OPENGL_GFX_SHADER_HPP
 
 #include <glad/gl.h>
 #include <glm/glm.hpp>
@@ -46,4 +46,4 @@ private:
     mutable std::unordered_map<std::string, GLint> locations_;  // cache nome -> location
 };
 
-#endif  // AULA_OPENGL_SHADER_HPP
+#endif  // AULA_OPENGL_GFX_SHADER_HPP

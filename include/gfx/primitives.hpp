@@ -1,9 +1,9 @@
-#ifndef AULA_OPENGL_PRIMITIVES_HPP
-#define AULA_OPENGL_PRIMITIVES_HPP
+#ifndef AULA_OPENGL_GFX_PRIMITIVES_HPP
+#define AULA_OPENGL_GFX_PRIMITIVES_HPP
 
 #include <glm/glm.hpp>
 
-#include "mesh.hpp"
+#include "gfx/mesh.hpp"
 
 // =============================================================================
 //  Primitivas geradas no código, base da modelagem dos objetos da cena.
@@ -42,4 +42,4 @@ MeshData plane(float width, float depth, float textureSize = 0.0f);
 
 }  // namespace primitives
 
-#endif  // AULA_OPENGL_PRIMITIVES_HPP
+#endif  // AULA_OPENGL_GFX_PRIMITIVES_HPP
