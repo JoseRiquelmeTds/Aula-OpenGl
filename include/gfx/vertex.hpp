@@ -1,5 +1,5 @@
-#ifndef AULA_OPENGL_VERTEX_HPP
-#define AULA_OPENGL_VERTEX_HPP
+#ifndef AULA_OPENGL_GFX_VERTEX_HPP
+#define AULA_OPENGL_GFX_VERTEX_HPP
 
 #include <glm/glm.hpp>
 
@@ -47,4 +47,4 @@ static_assert(sizeof(Vertex) == 8 * sizeof(float), "Vertex precisa ter exatament
 // essa configuração e não é preciso repetir no draw.
 void configureVertexAttributes();
 
-#endif  // AULA_OPENGL_VERTEX_HPP
+#endif  // AULA_OPENGL_GFX_VERTEX_HPP

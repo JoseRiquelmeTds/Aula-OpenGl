@@ -30,7 +30,7 @@ Onde cada coisa fica: [ARQUITETURA.md](ARQUITETURA.md). Modelagem (unidades, piv
 | Elemento | Case | Exemplo |
 | --- | --- | --- |
 | Arquivo C++ | `snake_case`, `.hpp` / `.cpp` com o mesmo nome | `scene_node.hpp`, `scene_node.cpp` |
-| Classe, struct, enum | `PascalCase` | `SceneNode`, `MeshData`, `InspectionMode` |
+| Classe, struct, enum | `PascalCase` | `SceneNode`, `MeshData`, `Texture::Wrap` |
 | Valor de `enum class` | `PascalCase` | `Wrap::ClampToEdge` |
 | Função, método | `camelCase`, verbo | `beginFrame()`, `addChild()`, `configureVertexAttributes()` |
 | Variável local, parâmetro | `camelCase` | `deltaTime`, `textureSize` |
@@ -71,10 +71,10 @@ Não há `clang-format` no repositório; siga o estilo do código existente:
 - Header guard `#ifndef/#define/#endif` com o nome da [tabela acima](#2-nomes-cases), comentado no `#endif`.
 - Header só com declarações e comentário de uso; implementação no `.cpp`. Exceção: getters de uma linha.
 - Ordem dos includes, separados por linha em branco:
-  1. no `.cpp`, o próprio header (`#include "mesh.hpp"`);
+  1. no `.cpp`, o próprio header (`#include "gfx/mesh.hpp"`);
   2. terceiros com `<>`, **`<glad/gl.h>` sempre antes do GLFW** e de outros headers de OpenGL;
   3. biblioteca padrão (`<vector>`, `<memory>`);
-  4. headers do projeto com `""`, caminho a partir de `include/` (`"gfx/mesh.hpp"` depois do refactor).
+  4. headers do projeto com `""`, caminho a partir de `include/` (`"core/camera.hpp"`, `"gfx/mesh.hpp"`).
 - Nada de `using namespace` em header.
 - Funções e constantes usadas só num `.cpp` ficam num **namespace anônimo**.
 - Declaração antecipada (`class Camera;`) quando o header só usa ponteiro ou referência.

@@ -1,4 +1,4 @@
-#include "vertex.hpp"
+#include "gfx/vertex.hpp"
 
 #include <glad/gl.h>
 

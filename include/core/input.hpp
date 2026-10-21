@@ -1,5 +1,5 @@
-#ifndef AULA_OPENGL_INPUT_HPP
-#define AULA_OPENGL_INPUT_HPP
+#ifndef AULA_OPENGL_CORE_INPUT_HPP
+#define AULA_OPENGL_CORE_INPUT_HPP
 
 #include <GLFW/glfw3.h>
 
@@ -58,4 +58,4 @@ private:
     bool focusChanged_ = false;
 };
 
-#endif  // AULA_OPENGL_INPUT_HPP
+#endif  // AULA_OPENGL_CORE_INPUT_HPP

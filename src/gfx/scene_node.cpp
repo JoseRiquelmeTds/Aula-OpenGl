@@ -1,4 +1,4 @@
-#include "scene_node.hpp"
+#include "gfx/scene_node.hpp"
 
 SceneNode::SceneNode(const Mesh* mesh, const glm::mat4& transform) : mesh(mesh), transform(transform) {}
 

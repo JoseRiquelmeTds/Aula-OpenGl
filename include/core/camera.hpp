@@ -1,5 +1,5 @@
-#ifndef AULA_OPENGL_CAMERA_HPP
-#define AULA_OPENGL_CAMERA_HPP
+#ifndef AULA_OPENGL_CORE_CAMERA_HPP
+#define AULA_OPENGL_CORE_CAMERA_HPP
 
 #include <glm/glm.hpp>
 
@@ -30,4 +30,4 @@ private:
     float pitch_ = 0.0f;
 };
 
-#endif  // AULA_OPENGL_CAMERA_HPP
+#endif  // AULA_OPENGL_CORE_CAMERA_HPP

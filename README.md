@@ -23,8 +23,8 @@ Sala de aula 3D navegável em C++17 e OpenGL 3.3 core: projeto da AB2 de Computa
 > stb_image (texturas), todas **compiladas a partir de `lib/`**. Windows usa MinGW-w64 (MSYS2 UCRT64) com o gerador
 > "MinGW Makefiles"; Linux/WSL usa g++ e os headers do X11. Os presets estão em `CMakePresets.json`.
 > Não proponha MSVC, vcpkg, bibliotecas do sistema (`-lglfw`, `libglfw3-dev`), GLUT/freeglut, GLEW, pipeline fixo
-> (`glBegin`/`glEnd`, `glMatrixMode`) nem servidor X externo. Headers ficam em `include/`, implementações em `src/`,
-> shaders em `shaders/`, imagens em `assets/textures/`, bibliotecas de terceiros em `lib/`. O `CMakeLists.txt` encontra os
+> (`glBegin`/`glEnd`, `glMatrixMode`) nem servidor X externo. Headers ficam em `include/`, implementações em `src/`, as
+> duas divididas em `core/`, `gfx/`, `objects/` e `scene/` (veja docs/ARQUITETURA.md), shaders em `shaders/`, imagens em `assets/textures/`, bibliotecas de terceiros em `lib/`. O `CMakeLists.txt` encontra os
 > `.cpp` sozinho (não precisa ser editado para adicionar módulos).
 
 ---
@@ -90,8 +90,8 @@ o cursor é liberado e é preciso clicar de novo.
 ## Estrutura
 
 ```
-include/          headers (.hpp)
-src/              implementações (.cpp); main.cpp é o ponto de entrada
+include/          headers (.hpp), em core/ (input, câmera), gfx/ (OpenGL), objects/ (objetos) e scene/ (a sala)
+src/              implementações (.cpp), mesmas pastas; main.cpp é o ponto de entrada
 shaders/          shaders GLSL (.vert, .frag)
 assets/textures/  imagens usadas como textura (com tabela de licenças)
 lib/              bibliotecas de terceiros embutidas (GLFW, GLAD, GLM, stb_image), veja lib/README.md
@@ -108,7 +108,7 @@ Camadas, módulos e onde adicionar cada coisa: [docs/ARQUITETURA.md](docs/ARQUIT
 | Documento | Conteúdo |
 | --- | --- |
 | [docs/SETUP.md](docs/SETUP.md) | Instalação do ambiente (Windows, Linux, WSL2) e problemas comuns |
-| [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Camadas, módulos, onde adicionar uma feature, refactor pendente |
+| [docs/ARQUITETURA.md](docs/ARQUITETURA.md) | Camadas, módulos, onde adicionar uma feature, revisão da arquitetura |
 | [docs/CONVENCOES.md](docs/CONVENCOES.md) | Modelagem: metros, eixos, pivô, vértice, estilo da mobília, atalhos de teclado |
 | [docs/DEV-CONVENCOES.md](docs/DEV-CONVENCOES.md) | Nomes e formatação do código, branches, commits, PRs e fluxo no Jira |
 | [lib/README.md](lib/README.md) | Versões, origem e licenças das bibliotecas |

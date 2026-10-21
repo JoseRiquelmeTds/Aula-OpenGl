@@ -1,4 +1,4 @@
-#include "input.hpp"
+#include "core/input.hpp"
 
 Input::Input(GLFWwindow* window)
     : window_(window), focused_(glfwGetWindowAttrib(window, GLFW_FOCUSED) == GLFW_TRUE) {

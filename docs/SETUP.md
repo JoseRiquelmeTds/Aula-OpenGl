@@ -182,7 +182,11 @@ Aula-OpenGl/
 ├── CMakeLists.txt        # build do projeto
 ├── CMakePresets.json     # presets linux, linux-release, windows, windows-release
 ├── include/              # headers (.hpp): só declarações (módulos em docs/ARQUITETURA.md)
-├── src/                  # implementações (.cpp)
+│   ├── core/             # input e câmera (sem OpenGL)
+│   ├── gfx/              # mesh, shader, textura, primitivas, SceneNode, renderer
+│   ├── objects/          # um módulo por objeto da sala (a partir da Sprint 1)
+│   └── scene/            # classroom: monta a sala, inspeção, teclas das interações
+├── src/                  # implementações (.cpp), nas mesmas pastas de include/
 │   └── main.cpp          # ponto de entrada (janela GLFW, GLAD, loop principal)
 ├── shaders/              # shaders GLSL (#version 330 core)
 ├── assets/

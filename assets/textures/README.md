@@ -1,6 +1,6 @@
 # Texturas
 
-Imagens usadas como textura, carregadas com `Texture` (`include/texture.hpp`). Caminhos relativos à raiz do
+Imagens usadas como textura, carregadas com `Texture` (`include/gfx/texture.hpp`). Caminhos relativos à raiz do
 repositório, ex.: `Texture madeira("assets/textures/madeira.png");`.
 
 **Toda imagem nova entra na tabela abaixo no mesmo commit**, com a origem e a licença. Prefira imagens CC0
