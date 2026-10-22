@@ -50,6 +50,16 @@ Classroom::Classroom()
     // em vez de atravessá-lo, e 0,02 m para baixo para o eixo do braço passar pelo pivô.
     joint.addChild(&armMesh_, glm::translate(glm::mat4(1.0f), glm::vec3(0.25f, -0.02f, 0.0f)));
     targets_.push_back({"objeto articulado", &base, {2.0f, 1.4f, 2.0f}, {0.9f, 0.6f, 0.0f}});
+
+    // Posições provisórias (ainda não há teto nem paredes): só translação, a montagem da sala
+    // (CG-69) troca estas matrizes. Lâmpada com o pivô a 2,8 m, como se encostada no teto.
+    const SceneNode& lamp = lamp_.addTo(root_, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.8f, 1.0f)));
+    targets_.push_back({"lâmpada", &lamp, {0.5f, 2.0f, 2.1f}, {0.0f, 2.76f, 1.0f}});  // de baixo, para ver os tubos
+
+    // Interruptor a 1,1 m do chão, frente para +Z: como se houvesse uma parede atrás dele, em -Z.
+    const SceneNode& lightSwitch =
+        lightSwitch_.addTo(root_, glm::translate(glm::mat4(1.0f), glm::vec3(-1.6f, 1.1f, 1.6f)));
+    targets_.push_back({"interruptor", &lightSwitch, {-1.5f, 1.16f, 1.86f}, {-1.6f, 1.1f, 1.61f}});
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {
