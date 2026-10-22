@@ -17,6 +17,18 @@ namespace {
 constexpr glm::vec3 kSceneEye(2.0f, 2.0f, 3.0f);
 constexpr glm::vec3 kSceneCenter(0.0f, 0.4f, 0.0f);
 
+// Medidas da sala (docs/CONVENCOES.md § 7): origem no centro do piso, parede do quadro em -Z.
+constexpr float kFrontWallZ = -3.5f;
+
+// Caixa da tela retrátil no alto da parede do quadro: a lona aberta vai de 2,82 a 1,32 m do chão,
+// na frente do quadro (0,9 a 2,1 m).
+constexpr glm::vec3 kScreenMount(0.0f, 2.86f, kFrontWallZ);
+
+// Ponto no espaço do objeto levado para o mundo: o enquadramento acompanha o placement.
+glm::vec3 toWorld(const glm::mat4& placement, const glm::vec3& local) {
+    return glm::vec3(placement * glm::vec4(local, 1.0f));
+}
+
 }  // namespace
 
 Classroom::Classroom()
@@ -59,6 +71,12 @@ Classroom::Classroom()
     const glm::vec3 fanEye = glm::vec3(fanPlacement * glm::vec4(0.48f, 0.40f, 1.10f, 1.0f));
     const glm::vec3 fanCenter = glm::vec3(fanPlacement * glm::vec4(0, 0.13f, 0.23f, 1.0f));
     targets_.push_back({"ventilador", &fan, fanEye, fanCenter});  // tecla 4; preserva 2 e 3
+
+    // Tela retrátil (CG-66): frente (+Z do objeto) já aponta para dentro da sala, só translação.
+    const glm::mat4 screenPlacement = glm::translate(glm::mat4(1.0f), kScreenMount);
+    const SceneNode& screen = screen_.addTo(root_, screenPlacement);
+    targets_.push_back({"tela retrátil", &screen, toWorld(screenPlacement, {0.9f, -0.5f, 2.6f}),
+                        toWorld(screenPlacement, {0.0f, -0.8f, 0.0f})});
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {
