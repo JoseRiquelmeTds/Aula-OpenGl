@@ -5,8 +5,9 @@ Como o código está organizado, quem depende de quem e **onde colocar cada cois
 vértice) em [CONVENCOES.md](CONVENCOES.md).
 
 > [!NOTE]
-> A pasta `objects/` e o `gfx/material` ainda não existem: nascem com o primeiro objeto da Sprint 1 e com a CG-72.
-> Por enquanto `scene/classroom` monta a cena de exemplo da estrutura de mesh (piso, cubo e objeto articulado).
+> O `gfx/material` ainda não existe: nasce com a CG-72. Por enquanto `scene/classroom` monta a cena de exemplo da
+> estrutura de mesh (piso, cubo e objeto articulado) e os objetos da Sprint 1 já modelados, em posição provisória até a
+> sala (CG-69).
 
 ## Sumário
 
@@ -317,7 +318,7 @@ na câmera. O movimento combinado é normalizado e usa `deltaTime`; o delta do m
 `deltaTime`. Não há colisões, gravidade ou limite de deslocamento.
 
 A inspeção fica em `scene::Classroom` (CG-87): `1` mostra a sala inteira e `2` a `9` isolam cada alvo registrado, na
-ordem da lista (hoje `2` = cubo e `3` = objeto articulado). Funciona com a janela em foco, mesmo com o cursor livre, e
+ordem da lista (hoje `2` = cubo, `3` = objeto articulado, `4` = ventilador e `5` = tela retrátil). Funciona com a janela em foco, mesmo com o cursor livre, e
 restaura um enquadramento para cada alvo; tecla sem alvo é ignorada. Depois a câmera continua livre. A perda de foco libera o cursor e exige
 novo clique para retomar a navegação; com o cursor livre não há movimento nem rotação pelo mouse.
 
