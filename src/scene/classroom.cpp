@@ -50,6 +50,11 @@ Classroom::Classroom()
     // em vez de atravessá-lo, e 0,02 m para baixo para o eixo do braço passar pelo pivô.
     joint.addChild(&armMesh_, glm::translate(glm::mat4(1.0f), glm::vec3(0.25f, -0.02f, 0.0f)));
     targets_.push_back({"objeto articulado", &base, {2.0f, 1.4f, 2.0f}, {0.9f, 0.6f, 0.0f}});
+
+    // Carteira (CG-62) em posição provisória, sem rotação: a frente (lado do aluno) fica para +Z.
+    const glm::mat4 studentDeskPlacement = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 1.2f));
+    const SceneNode& studentDesk = studentDesk_.addTo(root_, studentDeskPlacement);
+    targets_.push_back({"carteira", &studentDesk, {1.7f, 1.1f, 2.3f}, {1.0f, 0.5f, 1.2f}});  // tecla 4
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {
