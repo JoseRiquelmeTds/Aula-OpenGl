@@ -92,6 +92,14 @@ Classroom::Classroom()
     projector_.aimAt(toWorld(glm::inverse(projectorPlacement), screenCenter));
     targets_.push_back({"projetor", &projector, toWorld(projectorPlacement, {0.55f, -0.35f, 0.75f}),
                         toWorld(projectorPlacement, {0.0f, -0.22f, 0.0f})});
+
+    // Lixeira (CG-67): no chão, no canto da parede do quadro (posição provisória até a sala, CG-69).
+    // Simétrica em Y, então basta a translação.
+    const glm::mat4 trashCanPlacement = glm::translate(glm::mat4(1.0f), glm::vec3(2.6f, 0.0f, -3.1f));
+    const SceneNode& trashCan = trashCan_.addTo(root_, trashCanPlacement);
+    // Enquadramento de cima e de lado, para ver o interior oco e a espessura da borda.
+    targets_.push_back({"lixeira", &trashCan, toWorld(trashCanPlacement, {-0.45f, 0.85f, 0.55f}),
+                        toWorld(trashCanPlacement, {0.0f, 0.18f, 0.0f})});
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {
