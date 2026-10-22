@@ -78,11 +78,11 @@ Teclado e mouse dentro da janela. Lista completa na entrega (CG-81); atalhos pla
 | `A` / `D` | Move para a esquerda / direita |
 | `Espaço` / `Ctrl` esquerdo | Sobe / desce no eixo Y do mundo |
 | Mouse (cursor capturado) | Olha para os lados (yaw) e para cima/baixo (pitch limitado a ±89°) |
-| `1` a `6` | Inspeção: cena completa / cubo / objeto articulado / ventilador / tela retrátil / projetor, cada um isolado |
+| `1` a `7` | Inspeção: cena completa / cubo / objeto articulado / ventilador / tela retrátil / projetor / lixeira, cada um isolado |
 | `Esc` | Libera o cursor; com o cursor já livre, fecha |
 | `Q` | Fecha |
 
-Com o cursor livre não há movimento nem rotação pelo mouse; a inspeção (`1`–`6`) funciona mesmo assim. Ao perder o foco,
+Com o cursor livre não há movimento nem rotação pelo mouse; a inspeção (`1`–`7`) funciona mesmo assim. Ao perder o foco,
 o cursor é liberado e é preciso clicar de novo.
 
 <!-- CG-81 (Sprint 3): interações (tela retrátil, ventilador, projetor) e a inspeção de cada objeto. -->
@@ -104,6 +104,11 @@ separada (a CG-77 dá brilho a ela). A origem local é o ponto de fixação no t
 `objects::Projector::aimAt(alvo)` inclina a cabeça para o eixo da lente passar pelo alvo; a `Classroom` usa o centro
 da lona, então mover a tela ou o projetor realinha os dois sozinho. A tecla `P` e a projeção ficam para a CG-77; o
 gabinete receberá `plastico_projetor.png`.
+
+A lixeira (CG-67) é um tronco de cone oco de 0,30 m de diâmetro na boca e 0,40 m de altura, com parede de 6 mm e
+borda com espessura, em posição provisória no canto da parede do quadro até a sala (CG-69). Pivô no centro do fundo.
+O mesh é montado em `src/objects/trash_can.cpp` (paredes externa e interna, borda e dois fundos). Até os materiais por
+peça (CG-72), ela usa a textura UV provisória da cena; receberá `plastico_lixeira.png`.
 
 ## Estrutura
 
