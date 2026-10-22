@@ -78,11 +78,11 @@ Teclado e mouse dentro da janela. Lista completa na entrega (CG-81); atalhos pla
 | `A` / `D` | Move para a esquerda / direita |
 | `Espaço` / `Ctrl` esquerdo | Sobe / desce no eixo Y do mundo |
 | Mouse (cursor capturado) | Olha para os lados (yaw) e para cima/baixo (pitch limitado a ±89°) |
-| `1` a `5` | Inspeção: cena completa / cubo / objeto articulado / ventilador / tela retrátil, cada um isolado |
+| `1` a `6` | Inspeção: cena completa / cubo / objeto articulado / ventilador / tela retrátil / projetor, cada um isolado |
 | `Esc` | Libera o cursor; com o cursor já livre, fecha |
 | `Q` | Fecha |
 
-Com o cursor livre não há movimento nem rotação pelo mouse; a inspeção (`1`–`5`) funciona mesmo assim. Ao perder o foco,
+Com o cursor livre não há movimento nem rotação pelo mouse; a inspeção (`1`–`6`) funciona mesmo assim. Ao perder o foco,
 o cursor é liberado e é preciso clicar de novo.
 
 <!-- CG-81 (Sprint 3): interações (tela retrátil, ventilador, projetor) e a inspeção de cada objeto. -->
@@ -98,6 +98,12 @@ provisória até a sala (CG-69). A origem local é o centro da face da caixa enc
 `objects::ProjectionScreen::setOpenAmount(s)` recolhe a lona para cima (0 = recolhida, 1 = aberta) escalando só a
 articulação no topo da lona; a tecla `T` e a animação ficam para a CG-75. Até os materiais por peça (CG-72), ela usa
 a textura UV provisória da cena; a lona receberá `lona_tela.png`.
+
+O projetor (CG-65) fica preso ao teto a cerca de 2,9 m da tela, com corpo de 0,30 × 0,10 × 0,25 m e a lente como peça
+separada (a CG-77 dá brilho a ela). A origem local é o ponto de fixação no teto, com frente (lente) +Z.
+`objects::Projector::aimAt(alvo)` inclina a cabeça para o eixo da lente passar pelo alvo; a `Classroom` usa o centro
+da lona, então mover a tela ou o projetor realinha os dois sozinho. A tecla `P` e a projeção ficam para a CG-77; o
+gabinete receberá `plastico_projetor.png`.
 
 ## Estrutura
 
