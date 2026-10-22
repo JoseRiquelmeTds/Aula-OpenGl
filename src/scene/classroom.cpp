@@ -50,6 +50,16 @@ Classroom::Classroom()
     // em vez de atravessá-lo, e 0,02 m para baixo para o eixo do braço passar pelo pivô.
     joint.addChild(&armMesh_, glm::translate(glm::mat4(1.0f), glm::vec3(0.25f, -0.02f, 0.0f)));
     targets_.push_back({"objeto articulado", &base, {2.0f, 1.4f, 2.0f}, {0.9f, 0.6f, 0.0f}});
+
+    // Posição provisória para testes (a montagem da sala é a CG-69). Sem rotação, a frente da mesa (+Z, painel
+    // frontal) já fica voltada para a turma, que olha para -Z.
+    const glm::mat4 deskPlacement = glm::translate(glm::mat4(1.0f), glm::vec3(0.9f, 0.0f, -1.3f));
+    const SceneNode& teacherDesk = teacherDesk_.addTo(root_, deskPlacement);
+    // Enquadramento no espaço da mesa, do lado do professor (-Z) para mostrar as gavetas: acompanha a mesa se a
+    // posição ou a orientação mudarem.
+    const glm::vec3 deskEye = glm::vec3(deskPlacement * glm::vec4(-1.0f, 1.2f, -1.5f, 1.0f));
+    const glm::vec3 deskCenter = glm::vec3(deskPlacement * glm::vec4(0.0f, 0.4f, 0.0f, 1.0f));
+    targets_.push_back({"mesa do professor", &teacherDesk, deskEye, deskCenter});  // tecla 4
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {
