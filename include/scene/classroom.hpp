@@ -9,6 +9,7 @@
 #include "gfx/mesh.hpp"
 #include "gfx/scene_node.hpp"
 #include "gfx/texture.hpp"
+#include "objects/fan.hpp"
 
 class Camera;
 class Input;
@@ -25,7 +26,7 @@ namespace scene {
 //  addTo no construtor e registre um alvo de inspeção (docs/ARQUITETURA.md § 4).
 //  Todo alvo é um filho direto da raiz: a inspeção esconde os outros filhos.
 //
-//  Por enquanto a cena é o exemplo da estrutura de mesh: piso, cubo e um objeto articulado.
+//  Cena de testes: piso, cubo, objeto articulado e ventilador de parede.
 //
 //  Cria meshes e texturas: construir com o contexto OpenGL ativo e destruir antes da janela.
 class Classroom {
@@ -70,6 +71,7 @@ private:
     Mesh armMesh_;
     // Vermelho cresce com u (para a direita) e verde com v (para cima). Verde embaixo = imagem invertida.
     Texture testTexture_;
+    objects::Fan fan_;
 
     SceneNode root_;
     std::vector<InspectionTarget> targets_;
