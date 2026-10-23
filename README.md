@@ -78,7 +78,7 @@ Teclado e mouse dentro da janela. Lista completa na entrega (CG-81); atalhos pla
 | `A` / `D` | Move para a esquerda / direita |
 | `Espaço` / `Ctrl` esquerdo | Sobe / desce no eixo Y do mundo |
 | Mouse (cursor capturado) | Olha para os lados (yaw) e para cima/baixo (pitch limitado a ±89°) |
-| `1` a `7` | Inspeção: cena completa / cubo / objeto articulado / ventilador / tela retrátil / projetor / lixeira, cada um isolado |
+| `1` a `9`, `0` | Inspeção: cena completa / cubo / objeto articulado / ventilador / lâmpada / interruptor / mesa do professor / tela retrátil / projetor / lixeira, cada um isolado |
 | `Esc` | Libera o cursor; com o cursor já livre, fecha |
 | `Q` | Fecha |
 
@@ -93,6 +93,16 @@ A origem local é a fixação na parede, com frente +Z. `Classroom` define seu p
 ficam para a CG-76. Até os materiais por peça (CG-72), ele usa a mesma textura UV provisória da cena;
 grade/suporte serão metal cinza-escuro e motor/pás, plástico preto.
 
+A lâmpada (CG-63) é uma luminária de sobrepor de 1,27 × 0,25 m com dois tubos T8 de 1,20 m, refletor em "W" e aletas;
+a origem local é o centro da face encostada no teto e ela desce para -Y. O interruptor tem espelho de 0,08 × 0,12 m,
+origem no centro da face encostada na parede e frente +Z; `objects::LightSwitch::setOn(bool)` só inclina a tecla, sem
+reconstruir geometria. A tecla `L` e o acender da luz ficam para a CG-73. Até os materiais por peça (CG-72), os dois
+usam a textura UV provisória da cena; as posições em `Classroom` também são provisórias.
+
+A mesa do professor (CG-64) tem tampo de 1,20 × 0,60 m a 0,75 m do chão, laterais e painel frontal de MDF e um
+gaveteiro de 3 gavetas fixas com puxadores. O pivô fica no chão, no centro da mesa; a frente (+Z, painel frontal) é o
+lado da turma e as gavetas abrem para o professor (-Z). A posição em `Classroom` é provisória. Até os materiais por peça
+(CG-72), usa a mesma textura UV da cena.
 A tela retrátil (CG-66) tem lona de 2,0 × 1,5 m e caixa de 2,10 m no alto da parede do quadro, em posição
 provisória até a sala (CG-69). A origem local é o centro da face da caixa encostada na parede, com frente +Z.
 `objects::ProjectionScreen::setOpenAmount(s)` recolhe a lona para cima (0 = recolhida, 1 = aberta) escalando só a
