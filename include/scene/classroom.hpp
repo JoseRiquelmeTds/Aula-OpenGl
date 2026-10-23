@@ -9,6 +9,7 @@
 #include "gfx/mesh.hpp"
 #include "gfx/scene_node.hpp"
 #include "gfx/texture.hpp"
+#include "objects/fan.hpp"
 #include "objects/lamp.hpp"
 
 class Camera;
@@ -72,6 +73,7 @@ private:
     Mesh armMesh_;
     // Vermelho cresce com u (para a direita) e verde com v (para cima). Verde embaixo = imagem invertida.
     Texture testTexture_;
+    objects::Fan fan_;
     objects::Lamp lamp_;
     objects::LightSwitch lightSwitch_;
 
