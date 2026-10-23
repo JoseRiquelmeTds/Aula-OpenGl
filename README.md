@@ -78,14 +78,26 @@ Teclado e mouse dentro da janela. Lista completa na entrega (CG-81); atalhos pla
 | `A` / `D` | Move para a esquerda / direita |
 | `Espaço` / `Ctrl` esquerdo | Sobe / desce no eixo Y do mundo |
 | Mouse (cursor capturado) | Olha para os lados (yaw) e para cima/baixo (pitch limitado a ±89°) |
-| `1` / `2` / `3` / `4` | Inspeção: cena completa / cubo isolado / objeto articulado isolado / mesa do professor isolada |
+| `1` / `2` / `3` / `4` / `5` / `6` / `7` | Inspeção: cena completa / cubo / objeto articulado / ventilador / lâmpada / interruptor / mesa do professor (cada um isolado) |
 | `Esc` | Libera o cursor; com o cursor já livre, fecha |
 | `Q` | Fecha |
 
-Com o cursor livre não há movimento nem rotação pelo mouse; a inspeção (`1`–`4`) funciona mesmo assim. Ao perder o foco,
+Com o cursor livre não há movimento nem rotação pelo mouse; a inspeção (`1`–`7`) funciona mesmo assim. Ao perder o foco,
 o cursor é liberado e é preciso clicar de novo.
 
 <!-- CG-81 (Sprint 3): interações (tela retrátil, ventilador, projetor) e a inspeção de cada objeto. -->
+
+O ventilador (CG-59) tem três pás de aproximadamente 0,50 m de diâmetro e grades de 0,556 m externos.
+A origem local é a fixação na parede, com frente +Z. `Classroom` define seu posicionamento provisório;
+`objects::Fan::setRotorAngle(graus)` gira só pás e tampa, sem reconstruir geometria. A tecla `V` e a animação
+ficam para a CG-76. Até os materiais por peça (CG-72), ele usa a mesma textura UV provisória da cena;
+grade/suporte serão metal cinza-escuro e motor/pás, plástico preto.
+
+A lâmpada (CG-63) é uma luminária de sobrepor de 1,27 × 0,25 m com dois tubos T8 de 1,20 m, refletor em "W" e aletas;
+a origem local é o centro da face encostada no teto e ela desce para -Y. O interruptor tem espelho de 0,08 × 0,12 m,
+origem no centro da face encostada na parede e frente +Z; `objects::LightSwitch::setOn(bool)` só inclina a tecla, sem
+reconstruir geometria. A tecla `L` e o acender da luz ficam para a CG-73. Até os materiais por peça (CG-72), os dois
+usam a textura UV provisória da cena; as posições em `Classroom` também são provisórias.
 
 A mesa do professor (CG-64) tem tampo de 1,20 × 0,60 m a 0,75 m do chão, laterais e painel frontal de MDF e um
 gaveteiro de 3 gavetas fixas com puxadores. O pivô fica no chão, no centro da mesa; a frente (+Z, painel frontal) é o
