@@ -11,6 +11,8 @@
 #include "gfx/texture.hpp"
 #include "objects/fan.hpp"
 #include "objects/projection_screen.hpp"
+#include "objects/projector.hpp"
+#include "objects/trash_can.hpp"
 
 class Camera;
 class Input;
@@ -75,6 +77,8 @@ private:
     Texture testTexture_;
     objects::Fan fan_;
     objects::ProjectionScreen screen_;
+    objects::Projector projector_;
+    objects::TrashCan trashCan_;
 
     SceneNode root_;
     std::vector<InspectionTarget> targets_;
