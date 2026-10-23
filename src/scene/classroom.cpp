@@ -17,6 +17,22 @@ namespace {
 constexpr glm::vec3 kSceneEye(2.0f, 2.0f, 3.0f);
 constexpr glm::vec3 kSceneCenter(0.0f, 0.4f, 0.0f);
 
+// Medidas da sala (docs/CONVENCOES.md § 7): origem no centro do piso, parede do quadro em -Z.
+constexpr float kFrontWallZ = -3.5f;
+constexpr float kCeilingHeight = 3.0f;
+
+// Caixa da tela retrátil no alto da parede do quadro: a lona aberta vai de 2,82 a 1,32 m do chão,
+// na frente do quadro (0,9 a 2,1 m).
+constexpr glm::vec3 kScreenMount(0.0f, 2.86f, kFrontWallZ);
+
+// Projetor no teto, a ~3 m da tela: throw ratio de ~1,5 para a imagem de 2,0 m cobrir a lona.
+constexpr glm::vec3 kProjectorMount(0.0f, kCeilingHeight, -0.5f);
+
+// Ponto no espaço do objeto levado para o mundo: o enquadramento acompanha o placement.
+glm::vec3 toWorld(const glm::mat4& placement, const glm::vec3& local) {
+    return glm::vec3(placement * glm::vec4(local, 1.0f));
+}
+
 }  // namespace
 
 Classroom::Classroom()
@@ -59,6 +75,31 @@ Classroom::Classroom()
     const glm::vec3 fanEye = glm::vec3(fanPlacement * glm::vec4(0.48f, 0.40f, 1.10f, 1.0f));
     const glm::vec3 fanCenter = glm::vec3(fanPlacement * glm::vec4(0, 0.13f, 0.23f, 1.0f));
     targets_.push_back({"ventilador", &fan, fanEye, fanCenter});  // tecla 4; preserva 2 e 3
+
+    // Tela retrátil (CG-66): frente (+Z do objeto) já aponta para dentro da sala, só translação.
+    const glm::mat4 screenPlacement = glm::translate(glm::mat4(1.0f), kScreenMount);
+    const SceneNode& screen = screen_.addTo(root_, screenPlacement);
+    targets_.push_back({"tela retrátil", &screen, toWorld(screenPlacement, {0.9f, -0.5f, 2.6f}),
+                        toWorld(screenPlacement, {0.0f, -0.8f, 0.0f})});
+
+    // Projetor (CG-65): girado 180° em Y para a frente (+Z do objeto) olhar para a tela, em -Z.
+    glm::mat4 projectorPlacement = glm::translate(glm::mat4(1.0f), kProjectorMount);
+    projectorPlacement = glm::rotate(projectorPlacement, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    const SceneNode& projector = projector_.addTo(root_, projectorPlacement);
+    // Alinhamento: centro da lona, do espaço da tela para o mundo e do mundo para o espaço do projetor.
+    // Mover a tela ou o projetor realinha sem mudar nenhum ângulo à mão.
+    const glm::vec3 screenCenter = toWorld(screenPlacement, screen_.canvasCenter());
+    projector_.aimAt(toWorld(glm::inverse(projectorPlacement), screenCenter));
+    targets_.push_back({"projetor", &projector, toWorld(projectorPlacement, {0.55f, -0.35f, 0.75f}),
+                        toWorld(projectorPlacement, {0.0f, -0.22f, 0.0f})});
+
+    // Lixeira (CG-67): no chão, no canto da parede do quadro (posição provisória até a sala, CG-69).
+    // Simétrica em Y, então basta a translação.
+    const glm::mat4 trashCanPlacement = glm::translate(glm::mat4(1.0f), glm::vec3(2.6f, 0.0f, -3.1f));
+    const SceneNode& trashCan = trashCan_.addTo(root_, trashCanPlacement);
+    // Enquadramento de cima e de lado, para ver o interior oco e a espessura da borda.
+    targets_.push_back({"lixeira", &trashCan, toWorld(trashCanPlacement, {-0.45f, 0.85f, 0.55f}),
+                        toWorld(trashCanPlacement, {0.0f, 0.18f, 0.0f})});
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {

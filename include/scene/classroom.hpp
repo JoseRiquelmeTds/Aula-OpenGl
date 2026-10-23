@@ -10,6 +10,9 @@
 #include "gfx/scene_node.hpp"
 #include "gfx/texture.hpp"
 #include "objects/fan.hpp"
+#include "objects/projection_screen.hpp"
+#include "objects/projector.hpp"
+#include "objects/trash_can.hpp"
 
 class Camera;
 class Input;
@@ -26,7 +29,8 @@ namespace scene {
 //  addTo no construtor e registre um alvo de inspeção (docs/ARQUITETURA.md § 4).
 //  Todo alvo é um filho direto da raiz: a inspeção esconde os outros filhos.
 //
-//  Cena de testes: piso, cubo, objeto articulado e ventilador de parede.
+//  Cena de testes: piso, cubo e objeto articulado de exemplo, mais os objetos da sala já modelados
+//  (em posição provisória até a sala, CG-69).
 //
 //  Cria meshes e texturas: construir com o contexto OpenGL ativo e destruir antes da janela.
 class Classroom {
@@ -72,6 +76,9 @@ private:
     // Vermelho cresce com u (para a direita) e verde com v (para cima). Verde embaixo = imagem invertida.
     Texture testTexture_;
     objects::Fan fan_;
+    objects::ProjectionScreen screen_;
+    objects::Projector projector_;
+    objects::TrashCan trashCan_;
 
     SceneNode root_;
     std::vector<InspectionTarget> targets_;
