@@ -69,6 +69,16 @@ Classroom::Classroom()
     const SceneNode& lightSwitch =
         lightSwitch_.addTo(root_, glm::translate(glm::mat4(1.0f), glm::vec3(-1.6f, 1.1f, 1.6f)));
     targets_.push_back({"interruptor", &lightSwitch, {-1.5f, 1.16f, 1.86f}, {-1.6f, 1.1f, 1.61f}});  // tecla 6
+
+    // Posição provisória para testes (a montagem da sala é a CG-69). Sem rotação, a frente da mesa (+Z, painel
+    // frontal) já fica voltada para a turma, que olha para -Z.
+    const glm::mat4 deskPlacement = glm::translate(glm::mat4(1.0f), glm::vec3(0.9f, 0.0f, -1.3f));
+    const SceneNode& teacherDesk = teacherDesk_.addTo(root_, deskPlacement);
+    // Enquadramento no espaço da mesa, do lado do professor (-Z) para mostrar as gavetas: acompanha a mesa se a
+    // posição ou a orientação mudarem.
+    const glm::vec3 deskEye = glm::vec3(deskPlacement * glm::vec4(-1.0f, 1.2f, -1.5f, 1.0f));
+    const glm::vec3 deskCenter = glm::vec3(deskPlacement * glm::vec4(0.0f, 0.4f, 0.0f, 1.0f));
+    targets_.push_back({"mesa do professor", &teacherDesk, deskEye, deskCenter});  // tecla 7
 }
 
 void Classroom::update(const Input& /*input*/, float /*deltaTime*/) {

@@ -11,6 +11,7 @@
 #include "gfx/texture.hpp"
 #include "objects/fan.hpp"
 #include "objects/lamp.hpp"
+#include "objects/teacher_desk.hpp"
 
 class Camera;
 class Input;
@@ -76,6 +77,7 @@ private:
     objects::Fan fan_;
     objects::Lamp lamp_;
     objects::LightSwitch lightSwitch_;
+    objects::TeacherDesk teacherDesk_;
 
     SceneNode root_;
     std::vector<InspectionTarget> targets_;
